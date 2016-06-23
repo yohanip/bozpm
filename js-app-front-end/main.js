@@ -15,6 +15,18 @@ Pages.login = require('./components/page-login')
 let MainApp = React.createClass({
 
   getInitialState: function () {
+    // check session storage
+    let user = sessionStorage.getItem('user')
+
+    if (user) {
+      user = JSON.parse(user)
+      global.user = user
+      return {
+        currentPage: 'management',
+        user: user
+      }
+    }
+
     return {
       currentPage: 'login',
       user: null
@@ -33,13 +45,15 @@ let MainApp = React.createClass({
 
   },
 
-  setUser: function(user){
+  setUser: function (user) {
+    if (!user) user = null
     global.user = user
-    this.setState({user, currentPage: user?'management':'login'})
+    sessionStorage.setItem('user', JSON.stringify(user))
+    this.setState({user, currentPage: user ? 'management' : 'login'})
   },
 
-  componentWillUpdate: function() {
-    if(this.state.currentPage != 'login' && !this.state.user){
+  componentWillUpdate: function () {
+    if (this.state.currentPage != 'login' && !this.state.user) {
       this.setState({currentPage: 'login'})
     }
   },
