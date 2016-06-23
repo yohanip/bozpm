@@ -8,7 +8,7 @@ let fetch = require('./helpers/fetch'),
     remove: function (taskId) {
       return fetch('delete', '/task/' + taskId).then((r) => {
         r.json().then(deletedItem => {
-          StreamLogic.add('admin', 'Removing task: ' + taskId + ', Task title: ' + deletedItem.title)
+          StreamLogic.add(global.user.displayName, 'Removing task: ' + taskId + ', Task title: ' + deletedItem.title)
         })
       })
     },
@@ -16,7 +16,7 @@ let fetch = require('./helpers/fetch'),
     edit: function (taskId, editedFields, oldFields, log) {
       return fetch('put', '/task/' + taskId, editedFields).then(() => {
         if (log === false) return true
-        StreamLogic.add('admin', 'Editing task to ' + JSON.stringify(editedFields, null, 2) + ', WAS: ' + JSON.stringify(oldFields, null, 2))
+        StreamLogic.add(global.user.displayName, 'Editing task to ' + JSON.stringify(editedFields, null, 2) + ', WAS: ' + JSON.stringify(oldFields, null, 2))
       })
     },
 
@@ -28,7 +28,7 @@ let fetch = require('./helpers/fetch'),
       }
 
       return fetch('post', '/task', payload).then(() => {
-        StreamLogic.add('admin', 'Adding task: ' + JSON.stringify(newTask, null, 2))
+        StreamLogic.add(global.user.displayName, 'Adding task: ' + JSON.stringify(newTask, null, 2))
       })
     },
 
