@@ -28,6 +28,9 @@
 // @import 'pages/signup.less';
 //
 // etc.
+html, body, #my-app, .container, .container-fluid, .full-height{
+  height: 100%;
+}
 
 body{
   /*font-family: "Consolas", monospace;*/
@@ -39,4 +42,39 @@ li{
 
 .btn{
   margin: 0 2px;
+}
+
+.ready-to-drop{
+  padding-top: 1px;
+  padding-bottom: 1px;
+  background-color: #efefef;
+}
+
+//supaya nggak ndek-ndekan waktu di hovering..
+p{
+ line-height: 1.7em;
+}
+
+.stream-item{
+  margin-bottom: 2em;
+}
+
+.the-streams{
+  height: 500px;
+  width: 100%;
+  overflow: scroll;
+}
+
+.meta{
+  font-size: 0.6em;
+  line-height: 0.75em;
+  margin-bottom: 0.3em;
+
+  .author{
+    float: left
+  }
+
+  .datetime{
+    float: right
+  }
 }
