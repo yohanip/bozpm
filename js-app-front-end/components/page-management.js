@@ -1,6 +1,6 @@
 "use strict"
 
-import { Button, Glyphicon, Modal, Col, Row, Form, FormGroup, FormControl } from 'react-bootstrap'
+import { Button, Glyphicon, Modal, Col, Row, Form, FormGroup, FormControl, Tabs, Tab } from 'react-bootstrap'
 
 let
   TaskSection = require('./task-section'),
@@ -20,7 +20,15 @@ let React = require('react'),
             <TaskSection />
           </Col>
           <Col md={3} className="full-height">
-            <Streamer />
+            <Tabs defaultActiveKey={1} id="uncontrolled-tab-example">
+              <Tab eventKey={1} title="Reports">
+                Reports
+              </Tab>
+              <Tab eventKey={2} title="Logs">
+                <Streamer />
+              </Tab>
+            </Tabs>
+
           </Col>
         </Row>
       )

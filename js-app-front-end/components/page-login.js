@@ -16,20 +16,13 @@ let React = require('react'),
     login: function (e) {
       e.preventDefault()
 
-      fetch('post', '/auth/login', this.state).then(r => {
-        if (r.ok) {
-          r.json().then(json => {
-            this.props.setUser({
-              email: json.email,
-              displayName: json.displayName,
-              picture: json.pic
-            })
-          })
-        } else {
-          r.json().then(json => alert(json.error))
-        }
+      let LoginLogic = require('../login-logic')
 
-      })
+      return LoginLogic(this.state.email, this.state.password)
+        .then((user) => {
+          this.props.setUser(user)
+        })
+        .catch(err => alert(err))
     },
 
     render: function () {

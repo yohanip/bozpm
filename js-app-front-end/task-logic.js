@@ -6,17 +6,23 @@ let fetch = require('./helpers/fetch'),
   TaskLogic = {
 
     remove: function (taskId) {
-      return fetch('delete', '/task/' + taskId).then((r) => {
-        r.json().then(deletedItem => {
-          StreamLogic.add(global.user.displayName, 'Removing task: ' + taskId + ', Task title: ' + deletedItem.title)
+      return fetch('delete', '/task/' + taskId)
+        .then((payload) => {
+
+          if(payload.status == 200){
+            StreamLogic.add(global.user, 'Removing task: ' + taskId + ', Task title: ' + payload.data.title)
+          }
+          else {
+            alert('Delete Task: ' + payload.data)
+          }
         })
-      })
+        .catch(err => alert('Delete Task: ' + err))
     },
 
     edit: function (taskId, editedFields, oldFields, log) {
       return fetch('put', '/task/' + taskId, editedFields).then(() => {
         if (log === false) return true
-        StreamLogic.add(global.user.displayName, 'Editing task to ' + JSON.stringify(editedFields, null, 2) + ', WAS: ' + JSON.stringify(oldFields, null, 2))
+        StreamLogic.add(global.user, 'Editing task to ' + JSON.stringify(editedFields, null, 2) + ', WAS: ' + JSON.stringify(oldFields, null, 2))
       })
     },
 
@@ -28,7 +34,7 @@ let fetch = require('./helpers/fetch'),
       }
 
       return fetch('post', '/task', payload).then(() => {
-        StreamLogic.add(global.user.displayName, 'Adding task: ' + JSON.stringify(newTask, null, 2))
+        StreamLogic.add(global.user, 'Adding task: ' + JSON.stringify(newTask, null, 2))
       })
     },
 
@@ -60,13 +66,20 @@ let fetch = require('./helpers/fetch'),
     },
 
     getTasks: function (socket) {
+      // put JWT token here..
+      socket.headers = {
+        Authorization: 'Bearer ' + global.user.token
+      }
       return new Promise((resolve, reject) => {
-        io.socket
+        socket
           .get('/task?sort=position', {
             where: {
-              parent: null
+              parent: [null, '']
             }
-          }, (tasks) => {
+          }, (tasks, resp) => {
+            if(resp.statusCode != 200)
+              return reject(resp.body.error)
+
             // find children tasks..
             Promise
               .each(tasks, (task, k) => {

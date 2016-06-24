@@ -2,7 +2,9 @@
 
 let React = require('react'),
   StreamLogic = require('../stream-logic'),
-  _ = require('lodash')
+  _ = require('lodash'),
+  ReactCSSTransitionGroup = require('react-addons-css-transition-group'),
+  Gravatar = require ('react-gravatar')
 
 import { Button, Glyphicon, Modal, Col, Row, Form, FormGroup, FormControl } from 'react-bootstrap'
 
@@ -74,7 +76,10 @@ let
         return (
           <div key={item.id} className="stream-item">
             <p className="meta">
-              <span className="author">{item.author}</span>
+              <span className="author">
+                <Gravatar email={item.author.email} size={20} rating="pg" https default="monsterid" className="CustomAvatar-image" />
+                {item.author.nickname}
+              </span>
               <span className="datetime"><TimeDisplay datetime={item.createdAt} className=""/></span>
 
               <span className="clearfix"/>
@@ -90,7 +95,10 @@ let
 
       return (
         <div className="the-streams">
-          {items}
+          <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
+            {items}
+          </ReactCSSTransitionGroup>
+
           <div className="more">
             <Button onClick={this.loadMore} disabled={this.state.loading}>More</Button>
           </div>

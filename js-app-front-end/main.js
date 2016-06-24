@@ -48,6 +48,7 @@ let MainApp = React.createClass({
   setUser: function (user) {
     if (!user) user = null
     global.user = user
+    console.log('current user:', user)
     sessionStorage.setItem('user', JSON.stringify(user))
     this.setState({user, currentPage: user ? 'management' : 'login'})
   },

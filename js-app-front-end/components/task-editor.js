@@ -1,22 +1,28 @@
 "use strict"
 
-let React = require ('react'),
-  TaskLogic = require ('../task-logic')
+let React = require('react'),
+  TaskLogic = require('../task-logic')
 
 import { Button, Glyphicon, Modal, Col, Row, Form, FormGroup, FormControl } from 'react-bootstrap'
+import {SliderPicker} from 'react-color'
 
 let TaskEditor = React.createClass({
   getInitialState: function () {
     return {
       title: '',
-      description: ''
+      description: '',
+      color: '#000',
+      position: 1000000
     }
   },
 
   onShow: function () {
+    let task = this.props.task
     this.setState({
-      title: this.props.task && this.props.task.title ? this.props.task.title : '',
-      description: this.props.task && this.props.task.description ? this.props.task.description : ''
+      title: task && task.title ? task.title : '',
+      description: task && task.description ? task.description : '',
+      color: task && task.color ? task.color : '#000',
+      position: task && task.position ? task.position : 1000000,
     })
   },
 
@@ -66,6 +72,12 @@ let TaskEditor = React.createClass({
                   onChange={(e) => this.setState({description: e.target.value})}
                   tabStop={2}
                   />
+              </Col>
+            </FormGroup>
+            <FormGroup>
+              <Col sm={2}>Color</Col>
+              <Col sm={10}>
+                <SliderPicker color={this.state.color} onChange={color => this.setState({color})}/>
               </Col>
             </FormGroup>
           </Form>

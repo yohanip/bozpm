@@ -48,13 +48,13 @@ let Task = React.createClass({
     // console.log('task: show children', this.state.showChildren)
 
     return (
-      <div>
+      <div style={{color: task.color ? task.color.hex : 'black'}}>
         <p
           onMouseEnter={()=>this.setState({showToolbar: true})}
           onMouseLeave={()=>this.setState({showToolbar: false})}
           >
 
-          {task.title || '--No Title--'} {task.position}
+          {task.title || '--No Title--'}
 
           {childrenShowHide}
 

@@ -1,9 +1,15 @@
 "use strict"
 
-let fetch = require ('./helpers/fetch')
+let fetch = require ('./helpers/fetch'),
+  _ = require ('lodash')
 
 let StreamLogic = {
   get: function(socket, page) {
+
+    //JWT
+    socket.headers = {
+      Authorization: 'Bearer ' + global.user.token
+    }
 
     if(typeof page == 'undefined' || !page || page < 0) page = 1
 
@@ -26,14 +32,17 @@ let StreamLogic = {
       // console.log(params)
 
       socket.get('/log?' + params, (logs, r) => {
+        if(r.statusCode != 200) return reject(r.body.error)
         // console.log(logs, r)
         resolve(logs)
       })
     })
   },
 
-  add: function(author, content) {
+  add: function(entity, content) {
     // console.log('adding logs')
+    let author = _.extend({}, entity)
+    delete author.token
     return fetch('post', '/log', {author, content})
   }
 }

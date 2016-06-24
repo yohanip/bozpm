@@ -140,10 +140,9 @@ let TaskSection = React.createClass({
 
       if (tasks.id == taskId) {
         found = tasks
-        return true
+        return tasks
       } else if (tasks.children) {
-        found = this.findTask(tasks.children, taskId)
-        if (found) return true
+        return this.findTask(tasks.children, taskId)
       }
     }
   },
@@ -154,38 +153,67 @@ let TaskSection = React.createClass({
     if (typeof toParent == 'undefined') toParent = null
 
     if (task) {
-      // delete that task from the tree..
-      let tasks = this.state.tasks
-
-      this.deleteId(tasks, task.id)
+      let globalTasks = this.state.tasks,
+        // for parent == null
+        tasks = globalTasks
 
       // return console.log(task, toParent, position)
+      if (toParent) {
+        // not yet supported..
+        return alert('not implemented yet.. :(')
+        // this occur on the main tasks..
+        let parent = this.findTask(globalTasks, toParent)
 
-      // update the task to server..
-      TaskLogic
-        .edit(taskId, {parent: toParent, position}, {
-          title: task.title,
-          description: task.description,
-          parent: task.parent
+        if (parent) {
+          tasks = parent.children ? parent.children : []
+        }
+        else {
+          return alert('Unknown parent!')
+        }
+      }
+
+      // delete that task from the tree..
+      this.deleteId(tasks, task.id)
+
+      // console.log(position, tasks)
+
+      let lower, higher
+
+      if(position == 0){
+        lower = [],
+        higher = tasks
+      } else {
+        lower = tasks.slice(0, position + 1)
+        higher = tasks.slice(position + 1)
+      }
+
+      // console.log(lower, higher)
+
+      // console.log(tasks)
+
+      tasks = _.concat(lower, [task], higher)
+
+      // console.log(tasks)
+      let newTasks = [],
+        idx = 0
+
+      return Promise
+        .each(tasks, (task) => {
+          if(!task) return;
+
+          newTasks.push(task)
+
+          //console.log(idx, task.title)
+          let lastPos = task.position
+          task.position = idx++
+
+          return TaskLogic.edit(task.id, {position: task.position}, {position: lastPos}, false)
         })
         .then(() => {
-          // show the representation..
-          if(!toParent) {
-            tasks.splice(position, 0, task)
-            this.setState({tasks})
-          }
-          else {
-            // search for the parent
-            let p = this.findTask(tasks, toParent)
-
-            if(p){
-              if(!p.children) p.children = []
-              p.children.push(task)
-            }
-
-            // set the tree..
-            this.setState({tasks})
-          }
+          // update our state!
+          this.setState({
+            tasks: newTasks
+          })
         })
     }
   },
@@ -250,10 +278,10 @@ let TaskSection = React.createClass({
     })
   },
 
-  render: function() {
+  render: function () {
     return (
       <div className="full-height" id="the-tasks">
-        <div className="clearfix" />
+        <div className="clearfix"/>
         <h1>Task Lists</h1>
 
         <p>ctrl+ins</p>
