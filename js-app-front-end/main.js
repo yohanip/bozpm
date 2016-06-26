@@ -1,15 +1,40 @@
 "use strict"
 
-// campur sari dweehhh..
-import { Button, Glyphicon, Modal, Col, Row, Form, FormGroup, FormControl } from 'react-bootstrap'
+import { Button, Glyphicon, Modal, Col, Row, Form, FormGroup, FormControl, Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap'
+import { Router, Route, hashHistory, IndexRoute } from 'react-router'
+import React from 'react'
+import ReactDom from 'react-dom'
 
-let React = require('react'),
-  ReactDom = require('react-dom')
+let PagePM = require('./components/page-management')
+let PageLogin = require('./components/page-login')
 
-let Pages = {}
+let CheckLogin = React.createClass({
+  componentDidMount: function () {
+    console.log('mounted!')
+  },
 
-Pages.management = require('./components/page-management')
-Pages.login = require('./components/page-login')
+  componentWillMount: function () {
+    // console.log('received update', p1, p2)
+    if (!this.props.route.user && this.props.route.path != '/login') {
+      //console.log('to login!')
+      location.href = '/#/login'
+    }
+  },
+
+  render: function () {
+    return (
+      <div className="full-height flex flex-horizontal">
+        <div id="tool-left">
+        </div>
+        <div id="page-content">
+          <div className="container-fluid">
+            {this.props.children}
+          </div>
+        </div>
+      </div>
+    )
+  }
+})
 
 // main app
 let MainApp = React.createClass({
@@ -22,59 +47,50 @@ let MainApp = React.createClass({
       user = JSON.parse(user)
       global.user = user
       return {
-        currentPage: 'management',
         user: user
       }
     }
 
     return {
-      currentPage: 'login',
       user: null
     }
   },
 
-  changePage: function (page) {
-    this.setState({currentPage: page})
-  },
-
   logout: function () {
-    this.setState({user: null})
-  },
-
-  login: function () {
-
+    this.setUser(null)
   },
 
   setUser: function (user) {
-    if (!user) user = null
-    global.user = user
-    console.log('current user:', user)
-    sessionStorage.setItem('user', JSON.stringify(user))
-    this.setState({user, currentPage: user ? 'management' : 'login'})
+
+    return new Promise(resolve => {
+      if (!user) user = null
+      global.user = user
+
+      this.setState({user}, () => resolve(user))
+
+      // console.log('current user:', user)
+      if (user) {
+        sessionStorage.setItem('user', JSON.stringify(user))
+      }
+      else {
+        sessionStorage.removeItem('user')
+      }
+    })
   },
 
-  componentWillUpdate: function () {
-    if (this.state.currentPage != 'login' && !this.state.user) {
-      this.setState({currentPage: 'login'})
-    }
+  componentDidMount: function () {
   },
 
   render: function () {
-    let Page = Pages[this.state.currentPage],
-      pageContent = <Page
-        user={this.state.user}
-        changePage={this.changePage}
-        login={this.login}
-        logout={this.logout}
-        setUser={this.setUser}
-        />
-
     return (
-      <div className="container-fluid">
-        {pageContent}
-      </div>
+      <Router history={hashHistory}>
+        <Route path="/" component={CheckLogin} user={this.state.user}>
+          <IndexRoute component={PagePM} user={this.state.user}/>
+          <Route path="/login" component={PageLogin} setUser={this.setUser}/>
+        </Route>
+      </Router>
     )
   }
 })
 
-ReactDom.render(<MainApp/>, document.getElementById('my-app'))
+ReactDom.render(<MainApp />, document.getElementById('my-app'))

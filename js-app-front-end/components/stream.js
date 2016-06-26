@@ -18,8 +18,18 @@ let
       }
     },
 
-    componentDidMount: function () {
+    componentDidUpdate: function() {
+      $(this.refs.logStream).getNiceScroll().resize()
+    },
 
+    componentDidMount: function () {
+      // prepare nice scroll
+      $(this.refs.logStream).niceScroll({
+        cursorwidth: "10px",
+        // autohidemode: 'leave',
+      })
+
+      // load the logs
       StreamLogic
         .get(io.socket, 1)
         .then((logs) => {
@@ -27,6 +37,7 @@ let
           this.setState({logs})
         })
 
+      // subscribe to created events..
       io.socket.on('log', (payload) => {
         // save current logs state..
         let logs = this.state.logs
@@ -41,7 +52,7 @@ let
         }
 
         // show models events.. <tracking..>
-        console.log('log payload:', payload)
+        // console.log('log payload:', payload)
       })
     },
 
@@ -94,7 +105,7 @@ let
 
 
       return (
-        <div className="the-streams">
+        <div className="the-streams" ref="logStream">
           <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={500} transitionLeaveTimeout={300}>
             {items}
           </ReactCSSTransitionGroup>

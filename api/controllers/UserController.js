@@ -18,7 +18,7 @@ module.exports = {
       // If user created successfuly we return user and token as response
       if (user) {
         // NOTE: payload is { id: user.id}
-        res.send({user: user, token: jwToken.issue(user.toJSON())});
+        res.send({user: user, token: jwToken.issue(user.email)});
       }
     });
   }

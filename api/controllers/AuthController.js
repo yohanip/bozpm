@@ -32,7 +32,7 @@ module.exports = {
         } else {
           res.json({
             user: user,
-            token: jwToken.issue(user.toJSON())
+            token: jwToken.issue(user.email)
           });
         }
       });

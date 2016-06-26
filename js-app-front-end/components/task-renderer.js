@@ -46,10 +46,6 @@ let TaskRenderer = React.createClass({
     })
   },
 
-  componentWillReceiveProps: function(props) {
-    // console.log('new props', props)
-  },
-
   render: function () {
     let Task = require('./task')
 
@@ -67,7 +63,7 @@ let TaskRenderer = React.createClass({
 
     return (
       <div style={{display: this.props.showChildren?'block':'none'}}>
-        <ul className="sortable-task">
+        <ul className="tree sortable-task">
           {childrens}
         </ul>
       </div>

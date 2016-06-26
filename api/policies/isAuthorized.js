@@ -4,6 +4,7 @@
  * @description :: Policy to check if user is authorized with JSON web token
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Policies
  */
+"use strict";
 
 module.exports = function (req, res, next) {
   var token;
@@ -30,7 +31,14 @@ module.exports = function (req, res, next) {
 
   jwToken.verify(token, function (err, token) {
     if (err) return res.json(401, {error: 'Invalid Token!'});
-    req.token = token; // This is the decrypted token or the payload you provided
-    next();
+
+    // do we have this person?
+    sails.models.user.find({email: token}).then(rows => {
+      if(rows.length < 1) return res.status(403).send( {error: 'Who are you?'})
+      req.token = rows[0]; // This is the decrypted token or the payload you provided
+
+      next();
+    })
+
   });
 };

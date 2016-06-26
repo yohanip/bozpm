@@ -218,8 +218,18 @@ let TaskSection = React.createClass({
     }
   },
 
+
+  componentDidUpdate: function() {
+    $(this.refs.TaskBox).getNiceScroll().resize();
+  },
+
+
   componentDidMount: function () {
     // subscribe to socket task events..
+    $(this.refs.TaskBox).niceScroll({
+      cursorwidth: '10px',
+      // autohidemode: 'leave',
+    })
 
     TaskLogic
       .getTasks(io.socket)
@@ -252,7 +262,7 @@ let TaskSection = React.createClass({
           }
 
           // show models events.. <tracking..>
-          console.log('task payload', payload)
+          // console.log('task payload', payload)
         })
       })
 
@@ -280,7 +290,7 @@ let TaskSection = React.createClass({
 
   render: function () {
     return (
-      <div className="full-height" id="the-tasks">
+      <div className="full-height" id="the-tasks" ref="TaskBox">
         <div className="clearfix"/>
         <h1>Task Lists</h1>
 

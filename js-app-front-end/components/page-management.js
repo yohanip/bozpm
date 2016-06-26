@@ -9,14 +9,19 @@ let
 let React = require('react'),
   PageManagement = React.createClass({
 
-    componentDidMount: function() {
-      $('.the-streams, #the-tasks').niceScroll()
+    componentWillMount: function() {
+      // prevent guests
+      if (!this.props.route.user && this.props.route.path != '/login') {
+        //console.log('to login!')
+        location.href = '/#/login'
+      }
     },
 
     render: function () {
       return (
         <Row className="full-height">
-          <Col md={9} className="full-height">
+          <Col md={9} className="full-height flex flex-vertical" id="tasks-list">
+            <div id="tool-top"></div>
             <TaskSection />
           </Col>
           <Col md={3} className="full-height">

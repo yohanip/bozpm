@@ -20,7 +20,8 @@ let React = require('react'),
 
       return LoginLogic(this.state.email, this.state.password)
         .then((user) => {
-          this.props.setUser(user)
+          this.props.route.setUser(user)
+            .then(() => location.href = '/')
         })
         .catch(err => alert(err))
     },
