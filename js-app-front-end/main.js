@@ -10,7 +10,7 @@ let PageLogin = require('./components/page-login')
 
 let CheckLogin = React.createClass({
   componentDidMount: function () {
-    console.log('mounted!')
+    // console.log('mounted!')
   },
 
   componentWillMount: function () {

@@ -36,7 +36,7 @@ let TimeDisplay = React.createClass({
 
   render: function() {
     return (
-      <span>{this.state.text}</span>
+      <span {...this.props}>{this.state.text}</span>
     )
   }
 })

@@ -60,7 +60,7 @@ module.exports = {
         return sails.models.task
           .create(req.body)
           .then(newTask => {
-            sails.models.task.publishCreate(newTask, req);
+            sails.models.task.publishCreate(newTask);
             res.send(newTask)
             next()
           })

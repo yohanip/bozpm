@@ -31,14 +31,14 @@ let
 
       // load the logs
       StreamLogic
-        .get(io.socket, 1)
+        .get(io.socket, this.props.url, 1)
         .then((logs) => {
           // console.log(logs)
           this.setState({logs})
         })
 
       // subscribe to created events..
-      io.socket.on('log', (payload) => {
+      io.socket.on(this.props.watch, (payload) => {
         // save current logs state..
         let logs = this.state.logs
 
@@ -65,9 +65,9 @@ let
         ++page
 
         StreamLogic
-          .get(io.socket, page)
+          .get(io.socket, this.props.url, page)
           .then((logs) => {
-            console.log(logs, logs.length)
+            // console.log(logs, logs.length)
 
             if (logs.length > 0) {
               this.page = page

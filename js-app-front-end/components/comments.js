@@ -1,16 +1,19 @@
 "use strict"
 
-import {Glyphicon} from 'react-bootstrap'
+import {Button} from 'react-bootstrap'
 
 let React = require('react')
 let Gravatar = require('react-gravatar')
 let TimeDisplay = require('./time-display')
 
+let Editor = require('./comment-editor')
+
 let Comments = React.createClass({
   getInitialState: function () {
     return {
       task: this.props.task,
-      comments: []
+      comments: [],
+      showEditor: false
     }
   },
 
@@ -19,11 +22,13 @@ let Comments = React.createClass({
   },
 
   componentWillReceiveProps: function (nextProps) {
-    if (!this.state.task || (nextProps.task.id != this.state.task.id)) {
+    // if nextProps define a task, and our task is not defined or differ..
+    if (nextProps.task && (!this.state.task || (nextProps.task.id != this.state.task.id))) {
       this.setState({
-        task: nextProps.task
+        task: nextProps.task,
+        comments: []
       }, () => {
-
+        console.log(nextProps)
         // retrieve the comments...
         // todo: separate this to a logical file
         io.socket.headers = {
@@ -35,7 +40,10 @@ let Comments = React.createClass({
           }
         }, (comments, resp) => {
           console.log(comments)
-          this.setState({comments})
+          if (resp.statusCode == 200) {
+            console.log(comments)
+            this.setState({comments})
+          }
         })
 
         // subscribe to events..
@@ -58,8 +66,22 @@ let Comments = React.createClass({
     $(this.refs.comments).getNiceScroll().resize()
   },
 
+  showEditor: function(showEditor) {
+    if(typeof showEditor == 'undefined') showEditor = true
+    this.setState({showEditor})
+  },
+
+  hideEditor: function() {
+    this.showEditor(false)
+  },
+
   render: function () {
+    // non display if there are no task assigned..
+    if(!this.state.task) return null
+
     let comments = this.state.comments.map(item => {
+      let progressReport = null
+
       return (
         <div className="media" key={item.id}>
           <div className="media-left">
@@ -71,6 +93,7 @@ let Comments = React.createClass({
             <p className="media-heading">{item.author && item.author.nickname ? item.author.nickname : 'unknown'},
               <TimeDisplay datetime={item.createdAt}/></p>
             {item.comment ? item.comment : 'no-comment'}
+            {progressReport}
           </div>
         </div>
       )
@@ -78,8 +101,15 @@ let Comments = React.createClass({
 
 
     return (
-      <div id="comments" className="full-height" ref="comments">
-        {comments}
+      <div id="comments" className="full-height flex flex-vertical">
+        <div id="comments-top-section">
+          <p>Task: <strong>{this.state.task.title}</strong></p>
+          <Button onClick={()=>this.showEditor(true)}>Add Comment/Report</Button>
+        </div>
+        <div id="comments-bottom-section" ref="comments">
+          {comments}
+        </div>
+        <Editor visible={this.state.showEditor} hide={this.hideEditor} task={this.state.task}/>
       </div>
     )
   }

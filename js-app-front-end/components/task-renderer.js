@@ -1,8 +1,11 @@
 "use strict"
 
-let React = require('react')
+let React = require('react'),
+  ReactCSSTransitionGroup = require('react-addons-css-transition-group')
 
-import { Button, Glyphicon, Modal, Col, Row, Form, FormGroup, FormControl } from 'react-bootstrap'
+import {
+  Button, Glyphicon, Modal, Col, Row, Form, FormGroup, FormControl
+}  from 'react-bootstrap'
 
 /**
  * tasks list

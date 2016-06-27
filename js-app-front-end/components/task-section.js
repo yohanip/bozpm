@@ -264,7 +264,7 @@ let TaskSection = React.createClass({
           }
 
           // show models events.. <tracking..>
-          // console.log('task payload', payload)
+          console.log('task payload', payload)
         })
       })
 

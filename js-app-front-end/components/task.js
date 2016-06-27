@@ -16,7 +16,7 @@ let Task = React.createClass({
   getInitialState: function () {
     return {
       showChildren: true,
-      showToolbar: false
+      showToolbar: false,
     }
   },
 
@@ -52,7 +52,7 @@ let Task = React.createClass({
 
     // console.log('task: show children', this.state.showChildren)
 
-    let progress = <ProgressBar now={task.progress ? task.progress : 0}
+    let progress = <ProgressBar now={task.progress ? parseInt(task.progress) : 0}
                                 label={`${task.progress ? task.progress : 0}%`}/>
 
     return (
@@ -66,7 +66,7 @@ let Task = React.createClass({
 
           {childrenShowHide}
 
-          <span style={{display: this.state.showToolbar?'inline':'none'}}>
+          <span style={{display: this.state.showToolbar ? 'inline':'none'}}>
             <Button
               bsSize="xs" bsStyle="info"
               onClick={()=>this.props.showTaskEditor(this.props.parent || null, task)}>

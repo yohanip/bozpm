@@ -11,6 +11,7 @@ let React = require('react'),
 
     componentWillMount: function () {
       // prevent guests
+      // console.log('The user: ', this.props.route.user)
       if (!this.props.route.user) {
         //console.log('to login!')
         location.href = '/#/login'
@@ -18,6 +19,9 @@ let React = require('react'),
     },
 
     render: function () {
+      // prevent rendering when there is no user defined!
+      if (!this.props.route.user) return null
+
       return (
         <div className="full-height flex flex-horizontal">
           <div className="full-height flex flex-vertical" id="tasks-list">
@@ -28,12 +32,12 @@ let React = require('react'),
             <TaskSection />
           </div>
           <div className="full-height" id="stream-list">
-            <Tabs defaultActiveKey={1}>
+            <Tabs defaultActiveKey={1} id="streamer-tabs">
               <Tab eventKey={1} title="Reports">
-                Reports
+                <Streamer url="/comment?where={isProgress:true}" watch="comment" />
               </Tab>
               <Tab eventKey={2} title="Logs">
-                <Streamer />
+                <Streamer url="/log" watch="log" />
               </Tab>
             </Tabs>
           </div>

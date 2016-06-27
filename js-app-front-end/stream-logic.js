@@ -1,21 +1,21 @@
 "use strict"
 
-let fetch = require ('./helpers/fetch'),
-  _ = require ('lodash')
+let fetch = require('./helpers/fetch'),
+  _ = require('lodash')
 
 let StreamLogic = {
-  get: function(socket, page) {
+  get: function (socket, url, page) {
 
     //JWT
     socket.headers = {
       Authorization: 'Bearer ' + global.user.token
     }
 
-    if(typeof page == 'undefined' || !page || page < 0) page = 1
+    if (typeof page == 'undefined' || !page || page < 0) page = 1
 
     page = parseInt(page)
 
-    if(!isFinite(page)) page = 1
+    if (!isFinite(page)) page = 1
 
     let limit = 5,
       skip = (page - 1) * limit
@@ -29,17 +29,20 @@ let StreamLogic = {
 
       params = params.join('&')
 
-      // console.log(params)
+      // console.log(url, url.indexOf('?') >= 0 ? '&' : '?', params)
+      let theUrl = url + (url.indexOf('?') >= 0 ? '&' : '?') + params
 
-      socket.get('/log?' + params, (logs, r) => {
-        if(r.statusCode != 200) return reject(r.body.error)
+      console.log('Stream url:', theUrl)
+
+      socket.get(theUrl, (logs, r) => {
+        if (r.statusCode != 200) return reject(r.body.error)
         // console.log(logs, r)
         resolve(logs)
       })
     })
   },
 
-  add: function(entity, content) {
+  add: function (entity, content) {
     // console.log('adding logs')
     let author = _.extend({}, entity)
     delete author.token
