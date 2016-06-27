@@ -24,12 +24,11 @@ let CheckLogin = React.createClass({
   render: function () {
     return (
       <div className="full-height flex flex-horizontal">
-        <div id="tool-left">
+        <div id="tool-left" className="tool">
+          <Glyphicon glyph="home" className="tool-icon"/>
         </div>
         <div id="page-content">
-          <div className="container-fluid">
-            {this.props.children}
-          </div>
+          {this.props.children}
         </div>
       </div>
     )
@@ -57,7 +56,7 @@ let MainApp = React.createClass({
   },
 
   logout: function () {
-    this.setUser(null)
+    this.setUser(null).then(() => location.href = '/')
   },
 
   setUser: function (user) {
@@ -85,7 +84,7 @@ let MainApp = React.createClass({
     return (
       <Router history={hashHistory}>
         <Route path="/" component={CheckLogin} user={this.state.user}>
-          <IndexRoute component={PagePM} user={this.state.user}/>
+          <IndexRoute component={PagePM} user={this.state.user} logout={this.logout}/>
           <Route path="/login" component={PageLogin} setUser={this.setUser}/>
         </Route>
       </Router>

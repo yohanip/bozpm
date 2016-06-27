@@ -30,6 +30,7 @@
 // etc.
 
 @import "layout";
+@import "palette";
 
 html, body, #my-app, .container, .container-fluid, .full-height{
   height: 100%;
@@ -37,6 +38,8 @@ html, body, #my-app, .container, .container-fluid, .full-height{
 
 body{
   /*font-family: "Consolas", monospace;*/
+  color: @primaryTextColor;
+  background-color: @lightPrimaryColor;
 }
 
 li{
@@ -56,19 +59,6 @@ li{
 //supaya nggak ndek-ndekan waktu di hovering..
 p{
  line-height: 1.7em;
-}
-
-.stream-item{
-  margin-bottom: 2em;
-  border-left: 3px solid black;
-  padding-left: 10px;
-}
-
-.the-streams{
-  height: 550px;
-  width: 100%;
-  overflow-y: scroll;
-  padding: 1em 0;
 }
 
 #the-tasks{

@@ -3,7 +3,12 @@
 let React = require('react'),
   TaskLogic = require('../task-logic')
 
-import { Button, Glyphicon, Modal, Col, Row, Form, FormGroup, FormControl } from 'react-bootstrap'
+import { Button,
+  Glyphicon,
+  Modal,
+  Col, Row,
+  Form, FormGroup, FormControl,
+  ProgressBar} from 'react-bootstrap'
 
 // one task
 let Task = React.createClass({
@@ -47,44 +52,53 @@ let Task = React.createClass({
 
     // console.log('task: show children', this.state.showChildren)
 
+    let progress = <ProgressBar now={task.progress ? task.progress : 0}
+                                label={`${task.progress ? task.progress : 0}%`}/>
+
     return (
       <div style={{color: task.color ? task.color.hex : 'black'}}>
-        <p
+        <div
           onMouseEnter={()=>this.setState({showToolbar: true})}
           onMouseLeave={()=>this.setState({showToolbar: false})}
           >
 
-          {task.title || '--No Title--'}
+          {task.title || '--No Title--'} {progress}
 
           {childrenShowHide}
 
           <span style={{display: this.state.showToolbar?'inline':'none'}}>
-              <Button
-                bsSize="xs" bsStyle="info"
-                onClick={()=>this.props.showTaskEditor(this.props.parent || null, task)}>
+            <Button
+              bsSize="xs" bsStyle="info"
+              onClick={()=>this.props.showTaskEditor(this.props.parent || null, task)}>
 
-                <Glyphicon glyph="pencil" title="edit sub task"/>
+              <Glyphicon glyph="pencil" title="edit sub task"/>
+            </Button>
 
-              </Button>
+            <Button
+              bsSize="xs" bsStyle="warning"
+              onClick={()=>this.props.showTaskEditor(task, null)}>
 
-              <Button
-                bsSize="xs" bsStyle="warning"
-                onClick={()=>this.props.showTaskEditor(task, null)}>
+              <Glyphicon
+                glyph="th-list" title="add sub task"/>
 
-                <Glyphicon
-                  glyph="th-list" title="add sub task"/>
+            </Button>
 
-              </Button>
+            <Button
+              bsSize="xs" bsStyle="danger"
+              onClick={this.deleteTask}>
 
-              <Button
-                bsSize="xs" bsStyle="danger"
-                onClick={this.deleteTask}>
+              <Glyphicon glyph="remove" title="delete"/>
 
-                <Glyphicon glyph="remove" title="delete"/>
+            </Button>
 
-              </Button>
+            <Button
+              bsSize="xs" bsStyle="info"
+              onClick={()=>this.props.showTaskComment(task)}>
+
+              <Glyphicon glyph="comment" title="comment"/>
+            </Button>
           </span>
-        </p>
+        </div>
 
         <TaskRenderer
           tasks={task.children?task.children:[]}
@@ -92,6 +106,7 @@ let Task = React.createClass({
           showTaskEditor={this.props.showTaskEditor}
           moveTask={this.props.moveTask}
           showChildren={this.state.showChildren}
+          showTaskComment={this.props.showTaskComment}
           />
       </div>
     )

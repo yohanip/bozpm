@@ -9,14 +9,16 @@ let React = require('react'),
 
 // components..
 let TaskEditor = require('./task-editor'),
-  TaskRenderer = require('./task-renderer')
+  TaskRenderer = require('./task-renderer'),
+  Comments = require ('./comments')
 
 let TaskSection = React.createClass({
   getInitialState: function () {
     return {
       tasks: [],
       currentTask: null,
-      currentTaskParent: null
+      currentTaskParent: null,
+      taskCommented: null, // for showing the task comments <reporting>
     }
   },
 
@@ -154,7 +156,7 @@ let TaskSection = React.createClass({
 
     if (task) {
       let globalTasks = this.state.tasks,
-        // for parent == null
+      // for parent == null
         tasks = globalTasks
 
       // return console.log(task, toParent, position)
@@ -179,9 +181,9 @@ let TaskSection = React.createClass({
 
       let lower, higher
 
-      if(position == 0){
+      if (position == 0) {
         lower = [],
-        higher = tasks
+          higher = tasks
       } else {
         lower = tasks.slice(0, position + 1)
         higher = tasks.slice(position + 1)
@@ -199,7 +201,7 @@ let TaskSection = React.createClass({
 
       return Promise
         .each(tasks, (task) => {
-          if(!task) return;
+          if (!task) return;
 
           newTasks.push(task)
 
@@ -219,7 +221,7 @@ let TaskSection = React.createClass({
   },
 
 
-  componentDidUpdate: function() {
+  componentDidUpdate: function () {
     $(this.refs.TaskBox).getNiceScroll().resize();
   },
 
@@ -288,31 +290,41 @@ let TaskSection = React.createClass({
     })
   },
 
+  showTaskComment: function(task) {
+    this.setState({
+      taskCommented: task
+    })
+  },
+
   render: function () {
     return (
-      <div className="full-height" id="the-tasks" ref="TaskBox">
-        <div className="clearfix"/>
-        <h1>Task Lists</h1>
+      <div className="full-height flex flex-horizontal" id="the-tasks" ref="TaskBox">
+        <div id="task-tree" className="full-height">
+          <div className="clearfix"/>
+          <h1>Task Lists</h1>
 
-        <p>ctrl+ins</p>
+          <TaskRenderer
+            tasks={this.state.tasks}
+            showTaskEditor={this.showTaskEditor}
+            showTaskComment={this.showTaskComment}
+            showChildren={true}
+            moveTask={this.moveTask}
+            />
 
-        <TaskRenderer
-          tasks={this.state.tasks}
-          showTaskEditor={this.showTaskEditor}
-          showChildren={true}
-          moveTask={this.moveTask}
-          />
+          <Button bsSize="xs" onClick={()=>this.showTaskEditor(null, null)} title="ctrl+ins">
+            <Glyphicon glyph="plus"/>
+          </Button>
 
-        <Button bsSize="xs" onClick={()=>this.showTaskEditor(null, null)}>
-          <Glyphicon glyph="plus"/>
-        </Button>
+          <TaskEditor
+            parent={this.state.currentTaskParent}
+            task={this.state.currentTask}
+            visible={this.state.showTaskEditor}
+            hide={()=>this.setState({showTaskEditor: false})}
+            />
+        </div>
 
-        <TaskEditor
-          parent={this.state.currentTaskParent}
-          task={this.state.currentTask}
-          visible={this.state.showTaskEditor}
-          hide={()=>this.setState({showTaskEditor: false})}
-          />
+        <Comments task={this.state.taskCommented}/>
+
       </div>
     )
   }

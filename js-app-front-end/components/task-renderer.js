@@ -23,14 +23,16 @@ let TaskRenderer = React.createClass({
       placeholder: "ui-state-highlight",
       start: (e, ui) => {
         // find ul with no li..
-        jQuery('ul.ui-sortable').each(function(idx, dom) {
+        jQuery('ul.ui-sortable').each(function (idx, dom) {
           let target = jQuery(dom)
-          if(target.find('li').length == 0){
+          if (target.find('li').length == 0) {
             target.addClass('ready-to-drop')
           }
         })
         // console.log('start', ui.item.attr('id'), ui.item.parent().children().index(ui.item), ui.item.parent().closest('li').attr('id'))
-        Mousetrap.bind('escape', function (){ jQuery('.sortable-task').sortable('cancel') })
+        Mousetrap.bind('escape', function () {
+          jQuery('.sortable-task').sortable('cancel')
+        })
       },
       stop: (e, ui) => {
         // console.log('stop', ui.item.attr('id'), ui.item.parent().children().index(ui.item), ui.item.parent().closest('li').attr('id'))
@@ -53,7 +55,10 @@ let TaskRenderer = React.createClass({
       // simple task without children
       return (
         <li key={task.id} id={task.id}>
-          <Task task={task} showTaskEditor={this.props.showTaskEditor} moveTask={this.props.moveTask}/>
+          <Task task={task}
+                showTaskEditor={this.props.showTaskEditor}
+                moveTask={this.props.moveTask}
+                showTaskComment={this.props.showTaskComment}/>
         </li>
       )
     })

@@ -47,4 +47,8 @@ module.exports.policies = {
   LogController: {
     '*': ['isAuthorized']
   },
+
+  CommentController: {
+    '*': ['isAuthorized']
+  }
 };

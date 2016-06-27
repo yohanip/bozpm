@@ -9,9 +9,9 @@ let
 let React = require('react'),
   PageManagement = React.createClass({
 
-    componentWillMount: function() {
+    componentWillMount: function () {
       // prevent guests
-      if (!this.props.route.user && this.props.route.path != '/login') {
+      if (!this.props.route.user) {
         //console.log('to login!')
         location.href = '/#/login'
       }
@@ -19,13 +19,16 @@ let React = require('react'),
 
     render: function () {
       return (
-        <Row className="full-height">
-          <Col md={9} className="full-height flex flex-vertical" id="tasks-list">
-            <div id="tool-top"></div>
+        <div className="full-height flex flex-horizontal">
+          <div className="full-height flex flex-vertical" id="tasks-list">
+            <div className="tool" id="tool-top">
+              Hello {this.props.route.user.nickname}!
+              <Button bsSize="xs" onClick={()=>this.props.route.logout()} title="Add new task">Logout</Button>
+            </div>
             <TaskSection />
-          </Col>
-          <Col md={3} className="full-height">
-            <Tabs defaultActiveKey={1} id="uncontrolled-tab-example">
+          </div>
+          <div className="full-height" id="stream-list">
+            <Tabs defaultActiveKey={1}>
               <Tab eventKey={1} title="Reports">
                 Reports
               </Tab>
@@ -33,9 +36,8 @@ let React = require('react'),
                 <Streamer />
               </Tab>
             </Tabs>
-
-          </Col>
-        </Row>
+          </div>
+        </div>
       )
     }
   })
