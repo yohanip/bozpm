@@ -19,8 +19,11 @@ module.exports = {
       unique: true // Yes unique one
     },
 
-    nickname: 'string',
-    pic: 'string',
+    nickname: {
+      type: 'string',
+      required: 'true',
+      unique: true // Yes unique one
+    },
 
     encryptedPassword: {
       type: 'string'

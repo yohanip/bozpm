@@ -7,10 +7,10 @@ let fetch = require('./helpers/fetch'),
 
     remove: function (taskId) {
       return fetch('delete', '/task/' + taskId)
-        .then((payload) => {
+        .then(payload => {
 
-          if(payload.status == 200){
-            StreamLogic.add(global.user, 'Removing task: ' + taskId + ', Task title: ' + payload.data.title)
+          if (payload.status == 200) {
+            StreamLogic.add(global.user, JSON.stringify({msg: 'Removing Task', title: payload.data.title}, null, 2))
           }
           else {
             alert('Delete Task: ' + payload.data)
@@ -20,10 +20,19 @@ let fetch = require('./helpers/fetch'),
     },
 
     edit: function (taskId, editedFields, oldFields, log) {
-      return fetch('put', '/task/' + taskId, editedFields).then(() => {
-        if (log === false) return true
-        StreamLogic.add(global.user, 'Editing task to ' + JSON.stringify(editedFields, null, 2) + ', WAS: ' + JSON.stringify(oldFields, null, 2))
-      })
+      return fetch('put', '/task/' + taskId, editedFields)
+        .then(payload => {
+          if (log === false) return true
+
+          if (payload.status == 200) {
+            StreamLogic.add(global.user, JSON.stringify({msg: 'Edit Task', to: editedFields, was: oldFields}, null, 2))
+          }
+          else {
+            alert('Delete Task: ' + payload.data)
+          }
+
+        })
+        .catch(err => alert('Edit Task: ' + err))
     },
 
     create: function (newTask, parent) {
@@ -33,9 +42,18 @@ let fetch = require('./helpers/fetch'),
         payload.parent = parent.id
       }
 
-      return fetch('post', '/task', payload).then(() => {
-        StreamLogic.add(global.user, 'Adding task: ' + JSON.stringify(newTask, null, 2))
-      })
+      return fetch('post', '/task', payload)
+        .then(() => {
+
+          if (payload.status == 200) {
+            StreamLogic.add(global.user, JSON.stringify({msg: 'Adding Task', newTask}, null, 2))
+          }
+          else {
+            alert('Create Task: ' + payload.data)
+          }
+
+        })
+        .catch(err => alert('Create Task: ' + err))
     },
 
     recursiveFindTaskChildren: function (socket, targetTask) {
@@ -77,7 +95,7 @@ let fetch = require('./helpers/fetch'),
               parent: [null, '']
             }
           }, (tasks, resp) => {
-            if(resp.statusCode != 200)
+            if (resp.statusCode != 200)
               return reject(resp.body.error)
 
             // find children tasks..

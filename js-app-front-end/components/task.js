@@ -31,6 +31,8 @@ let Task = React.createClass({
   },
 
   render: function () {
+    if(!global.user) return null
+
     let task = this.props.task,
       childrenShowHide = null
 
@@ -55,6 +57,10 @@ let Task = React.createClass({
     let progress = <ProgressBar now={task.progress ? parseInt(task.progress) : 0}
                                 label={`${task.progress ? task.progress : 0}%`}/>
 
+    // this is the marker for task currently assigned to me..
+    let thumbs = task.assignedTo && task.assignedTo.id == global.user.id ?
+      <Glyphicon glyph="thumbs-up" title="my task" style={{fontSize: '1.2em', fontWeight: 'bold', color: '#f00'}}/> : null
+
     return (
       <div style={{color: task.color ? task.color.hex : 'black'}}>
         <div
@@ -62,7 +68,7 @@ let Task = React.createClass({
           onMouseLeave={()=>this.setState({showToolbar: false})}
           >
 
-          {task.title || '--No Title--'} {progress}
+          {thumbs} {task.title || '--No Title--'} {progress}
 
           {childrenShowHide}
 
@@ -85,7 +91,7 @@ let Task = React.createClass({
 
             <Button
               bsSize="xs" bsStyle="danger"
-              onClick={this.deleteTask}>
+              onClick={()=>{if(confirm('delete task?')){this.deleteTask()}}}>
 
               <Glyphicon glyph="remove" title="delete"/>
 

@@ -19,7 +19,8 @@ let CommentEditor = React.createClass({
       isProgress: false,
       progress: 0,
       timeTaken: 0, // hour
-      comment: ''
+      comment: '',
+      loading: false
     }
   },
 
@@ -38,17 +39,23 @@ let CommentEditor = React.createClass({
   save: function (e) {
     e.preventDefault()
 
-    fetch('post', '/comment', _.extend({
-      taskId: this.props.task.id
-    }, this.state))
-      .then(resp => {
-        if (resp.status == 200) {
-          this.close()
-        }
-        else {
-          alert(resp.data)
-        }
-      })
+    this.setState({loading: true}, () => {
+      fetch('post', '/comment', _.extend(
+        {
+          taskId: this.props.task.id
+        }, _.omit(this.state, 'loading')))
+
+        .then(resp => {
+          this.setState({loading: false})
+
+          if (resp.status == 200) {
+            this.close()
+          }
+          else {
+            alert(resp.data)
+          }
+        })
+    })
   },
 
   render: function () {
@@ -121,7 +128,7 @@ let CommentEditor = React.createClass({
         </Modal.Body>
 
         <Modal.Footer>
-          <Button onClick={this.save} bsStyle="primary" tabStop={3}>Save</Button>
+          <Button onClick={this.save} bsStyle="primary" tabStop={3} disabled={this.state.loading}>Save</Button>
           <Button onClick={this.close} tabStop={4}>Close</Button>
         </Modal.Footer>
       </Modal>

@@ -7,6 +7,7 @@ import ReactDom from 'react-dom'
 
 let PagePM = require('./components/page-management')
 let PageLogin = require('./components/page-login')
+let PageRegister = require('./components/page-register')
 
 let CheckLogin = React.createClass({
   componentDidMount: function () {
@@ -86,6 +87,7 @@ let MainApp = React.createClass({
         <Route path="/" component={CheckLogin} user={this.state.user}>
           <IndexRoute component={PagePM} user={this.state.user} logout={this.logout}/>
           <Route path="/login" component={PageLogin} setUser={this.setUser}/>
+          <Route path="/register" component={PageRegister} setUser={this.setUser}/>
         </Route>
       </Router>
     )

@@ -222,17 +222,15 @@ let TaskSection = React.createClass({
 
 
   componentDidUpdate: function () {
-    $(this.refs.TaskBox).getNiceScroll().resize();
+    $(this.refs.taskTree).getNiceScroll().resize()
   },
 
 
   componentDidMount: function () {
-    // subscribe to socket task events..
-    $(this.refs.TaskBox).niceScroll({
-      cursorwidth: '10px',
-      // autohidemode: 'leave',
-    })
+    // nice scroll!
+    $(this.refs.taskTree).niceScroll()
 
+    // subscribe to socket task events..
     TaskLogic
       .getTasks(io.socket)
       // step 1. register.. by fetching those data
@@ -298,8 +296,8 @@ let TaskSection = React.createClass({
 
   render: function () {
     return (
-      <div className="full-height flex flex-horizontal" id="the-tasks" ref="TaskBox">
-        <div id="task-tree" className="full-height">
+      <div className="full-height flex flex-horizontal" id="the-tasks">
+        <div id="task-tree" ref="taskTree" className="full-height">
           <div className="clearfix"/>
           <h1>Task Lists</h1>
 
@@ -315,16 +313,16 @@ let TaskSection = React.createClass({
             <Glyphicon glyph="plus"/>
           </Button>
 
-          <TaskEditor
-            parent={this.state.currentTaskParent}
-            task={this.state.currentTask}
-            visible={this.state.showTaskEditor}
-            hide={()=>this.setState({showTaskEditor: false})}
-            />
         </div>
 
         <Comments task={this.state.taskCommented}/>
 
+        <TaskEditor
+          parent={this.state.currentTaskParent}
+          task={this.state.currentTask}
+          visible={this.state.showTaskEditor}
+          hide={()=>this.setState({showTaskEditor: false})}
+          />
       </div>
     )
   }

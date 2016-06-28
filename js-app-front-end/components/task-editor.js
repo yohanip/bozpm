@@ -1,7 +1,8 @@
 "use strict"
 
 let React = require('react'),
-  TaskLogic = require('../task-logic')
+  TaskLogic = require('../task-logic'),
+  _ = require('lodash')
 
 import { Button, Glyphicon, Modal, Col, Row, Form, FormGroup, FormControl } from 'react-bootstrap'
 import {SliderPicker} from 'react-color'
@@ -9,11 +10,31 @@ import {SliderPicker} from 'react-color'
 let TaskEditor = React.createClass({
   getInitialState: function () {
     return {
+      activeUsers: [global.user],
       title: '',
       description: '',
       color: '#000',
-      position: 1000000
+      position: 1000000,
+      assignedTo: null // user object (id and nickname here..)
     }
+  },
+
+  componentDidMount: function(){
+    // retrieve and subscribe for user changes..
+    io.socket.headers = {
+      Authorization: 'Bearer ' + global.user.token
+    }
+    io.socket.get('/user', (body, resp) => {
+      if(resp.statusCode == 200){
+        let activeUsers = this.state.activeUsers,
+          newUsers = body.filter(u => u.id != global.user.id)
+
+        newUsers.forEach(nu => activeUsers.push(nu))
+
+        this.setState({activeUsers})
+      }
+    })
+
   },
 
   onShow: function () {
@@ -23,6 +44,7 @@ let TaskEditor = React.createClass({
       description: task && task.description ? task.description : '',
       color: task && task.color ? task.color : '#000',
       position: task && task.position ? task.position : 1000000,
+      assignedTo: task && task.assignedTo ? task.assignedTo : null,
     })
   },
 
@@ -33,17 +55,26 @@ let TaskEditor = React.createClass({
   save: function (e) {
     e.preventDefault()
 
+    let payload = _.omit(this.state, 'children,activeUsers'.split(',')),
+      taskWas = _.omit(this.props.task, 'children')
+
     // alert(this.state.title + this.state.description)
     if (this.props.task && this.props.task.id) {
       // editing
-      TaskLogic.edit(this.props.task.id, this.state, this.props.task)
+      TaskLogic.edit(this.props.task.id, payload, taskWas)
     } else {
-      TaskLogic.create(this.state, this.props.parent)
+      TaskLogic.create(payload, this.props.parent)
     }
     this.props.hide()
   },
 
   render: function () {
+    let chooseUsers = this.state.activeUsers.map((usr) => {
+      return (
+        <option key={usr.id} value={JSON.stringify({id:usr.id, nickname: usr.nickname})}>{usr.nickname}</option>
+      )
+    })
+
     return (
       <Modal show={this.props.visible} onHide={this.close} onShow={this.onShow}>
         <Modal.Header closeButton={true}>
@@ -80,6 +111,22 @@ let TaskEditor = React.createClass({
                 <SliderPicker color={this.state.color} onChange={color => this.setState({color})}/>
               </Col>
             </FormGroup>
+
+            <FormGroup>
+              <Col sm={2}>Assign To</Col>
+              <Col sm={10}>
+                <FormControl
+                    componentClass="select" placeholder="select"
+                    value={JSON.stringify(this.state.assignedTo)}
+                    onChange={e => this.setState({assignedTo: JSON.parse(e.target.value)})}>
+
+                  <option value={JSON.stringify(null)}>Anyone</option>
+                  {chooseUsers}
+
+                </FormControl>
+              </Col>
+            </FormGroup>
+
           </Form>
         </Modal.Body>
         <Modal.Footer>

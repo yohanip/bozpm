@@ -17,10 +17,6 @@ let Comments = React.createClass({
     }
   },
 
-  componentDidMount: function () {
-    $(this.refs.comments).niceScroll()
-  },
-
   componentWillReceiveProps: function (nextProps) {
     // if nextProps define a task, and our task is not defined or differ..
     if (nextProps.task && (!this.state.task || (nextProps.task.id != this.state.task.id))) {
@@ -28,7 +24,7 @@ let Comments = React.createClass({
         task: nextProps.task,
         comments: []
       }, () => {
-        console.log(nextProps)
+        // console.log(nextProps)
         // retrieve the comments...
         // todo: separate this to a logical file
         io.socket.headers = {
@@ -39,9 +35,8 @@ let Comments = React.createClass({
             taskId: this.state.task.id
           }
         }, (comments, resp) => {
-          console.log(comments)
+          // console.log(comments)
           if (resp.statusCode == 200) {
-            console.log(comments)
             this.setState({comments})
           }
         })
@@ -62,22 +57,24 @@ let Comments = React.createClass({
   },
 
 
-  componenetDidUpdate: function () {
-    $(this.refs.comments).getNiceScroll().resize()
+  componentDidUpdate: function () {
+    let nice = $(this.refs.commentList).getNiceScroll()
+    if (nice.length < 1) return $(this.refs.commentList).niceScroll()
+    nice.resize()
   },
 
-  showEditor: function(showEditor) {
-    if(typeof showEditor == 'undefined') showEditor = true
+  showEditor: function (showEditor) {
+    if (typeof showEditor == 'undefined') showEditor = true
     this.setState({showEditor})
   },
 
-  hideEditor: function() {
+  hideEditor: function () {
     this.showEditor(false)
   },
 
   render: function () {
     // non display if there are no task assigned..
-    if(!this.state.task) return null
+    if (!this.state.task) return null
 
     let comments = this.state.comments.map(item => {
       let progressReport = null
@@ -106,7 +103,7 @@ let Comments = React.createClass({
           <p>Task: <strong>{this.state.task.title}</strong></p>
           <Button onClick={()=>this.showEditor(true)}>Add Comment/Report</Button>
         </div>
-        <div id="comments-bottom-section" ref="comments">
+        <div id="comments-bottom-section" ref="commentList">
           {comments}
         </div>
         <Editor visible={this.state.showEditor} hide={this.hideEditor} task={this.state.task}/>

@@ -32,7 +32,7 @@ let StreamLogic = {
       // console.log(url, url.indexOf('?') >= 0 ? '&' : '?', params)
       let theUrl = url + (url.indexOf('?') >= 0 ? '&' : '?') + params
 
-      console.log('Stream url:', theUrl)
+      // console.log('Stream url:', theUrl)
 
       socket.get(theUrl, (logs, r) => {
         if (r.statusCode != 200) return reject(r.body.error)

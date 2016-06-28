@@ -7,10 +7,15 @@
 
 "use strict"
 
+
 module.exports = {
 // override blueprint here..
   create: function (req, res, next) {
-    let p = Promise.resolve(true)
+    let p = Promise.resolve(null)
+
+    if (typeof req.body.isProgress != 'boolean') {
+      req.body.isProgress = String(req.body.isProgress).toLowerCase() === 'true'
+    }
 
     if (req.body.isProgress) {
       //check if the posted task has children?
@@ -21,9 +26,9 @@ module.exports = {
           }
         })
         .then(tasks => {
-          if (tasks.length > 0) throw 'Could not set progress on this task (it have children)'
+          if (tasks.length > 0) throw {status: 400, error: 'Could not set progress on this task (it have children)'}
 
-          // find the task..
+          // next, let's verify the task progressed..
           return sails.models.task.findOne(req.body.taskId)
         })
         .then(task => {
@@ -33,22 +38,32 @@ module.exports = {
           return sails.models.task
             .update(req.body.taskId, {progress: req.body.progress})
             .then(updated => {
-              console.log(updated)
+              // console.log(updated)
               sails.models.task.publishUpdate(updated[0].id, {progress: updated[0].progress})
+
+              if (task.parent) {
+                return sails.models.task.updateParentTaskProgress(task.parent)
+              }
             })
+            .then(() => task)
         })
     }
 
-    return p.then(() => {
-      sails.models.comment
-        .create(_.extend({author: req.token}, req.body))
-        .then(newComment => {
-          sails.models.comment.publishCreate(newComment)
-          res.send(newComment)
-          next()
-        })
-        .catch(err => res.negotiate(err))
-    })
+    return p
+      .then((task) => {
+        let payload = _.extend({author: req.token}, req.body)
+
+        if(task) payload.taskTitle = task.title
+
+        return sails.models.comment
+          .create(payload)
+          .then(newComment => {
+            sails.models.comment.publishCreate(newComment)
+            res.send(newComment)
+            next()
+          })
+      })
+      .catch(err => res.negotiate(err))
 
   }
 }

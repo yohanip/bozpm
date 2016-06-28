@@ -11,6 +11,10 @@ module.exports = {
       return res.status(403).json({error: 'Password doesn\'t match, What a shame!'});
     }
 
+    if(!(req.body.nickname && req.body.nickname.length > 3)){
+      return res.status(403).json({error: 'Jenengan ne sopo yo?'});
+    }
+
     sails.models.user.create(req.body).exec(function (err, user) {
       if (err) {
         return res.status(403).json({error: err});

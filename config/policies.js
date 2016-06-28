@@ -36,19 +36,28 @@ module.exports.policies = {
   UserController: {
     // register
     'create': true,
-    // Only admin should be able to retrieve all user..
-    'find': ['isAuthorized','isAdmin']
+    // Only admin should be able to retrieve,and edit user..
+    'find': ['isAuthorized','isAdmin'],
+    'update': ['isAuthorized','isAdmin'],
+    'destroy': ['isAuthorized','isAdmin'],
   },
 
   TaskController: {
-    '*': ['isAuthorized']
+    'find': ['isAuthorized'],
+    'create': ['isAuthorized'],
+    'update': ['isAuthorized','isAdmin'],
+    'destroy': ['isAuthorized','isAdmin'],
   },
 
   LogController: {
-    '*': ['isAuthorized']
+    'find': ['isAuthorized'],
+    'create': ['isAuthorized']
   },
 
   CommentController: {
-    '*': ['isAuthorized']
+    'find': ['isAuthorized'],
+    'create': ['isAuthorized'],
+    'update': ['isAuthorized','isAdmin'],
+    'destroy': ['isAuthorized','isAdmin'],
   }
 };

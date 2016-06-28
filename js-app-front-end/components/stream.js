@@ -8,6 +8,59 @@ let React = require('react'),
 
 import { Button, Glyphicon, Modal, Col, Row, Form, FormGroup, FormControl } from 'react-bootstrap'
 
+
+let ReportItemDisplay = React.createClass({
+  render: function() {
+    let item = this.props.item
+
+    return (
+      <div className="stream-item">
+        <p className="meta">
+              <span className="author">
+                <Gravatar email={item.author.email} size={20} rating="pg" https default="monsterid" className="CustomAvatar-image" />
+                {item.author.nickname}
+              </span>
+          <span className="datetime"><TimeDisplay datetime={item.createdAt} className=""/></span>
+
+          <span className="clearfix"/>
+        </p>
+
+        <p className="content">
+          Task Title: <strong>{item.taskTitle?item.taskTitle:'#NA#'}</strong><br/>
+          {item.comment}<br/>
+          Progress: <strong>{item.progress} %</strong>, Time: <strong>{item.timeTaken}h</strong>
+        </p>
+      </div>
+    )
+  }
+})
+
+let LogItemDisplay = React.createClass({
+
+  render: function() {
+    let item = this.props.item
+
+    return (
+      <div className="stream-item">
+        <p className="meta">
+              <span className="author">
+                <Gravatar email={item.author.email} size={20} rating="pg" https default="monsterid" className="CustomAvatar-image" />
+                {item.author.nickname}
+              </span>
+          <span className="datetime"><TimeDisplay datetime={item.createdAt} className=""/></span>
+
+          <span className="clearfix"/>
+        </p>
+
+        <pre className="content">
+          {item.content}
+        </pre>
+      </div>
+    )
+  }
+
+})
+
 let
   TimeDisplay = require('./time-display'),
   Stream = React.createClass({
@@ -24,10 +77,7 @@ let
 
     componentDidMount: function () {
       // prepare nice scroll
-      $(this.refs.logStream).niceScroll({
-        cursorwidth: "10px",
-        // autohidemode: 'leave',
-      })
+      $(this.refs.logStream).niceScroll()
 
       // load the logs
       StreamLogic
@@ -43,8 +93,20 @@ let
         let logs = this.state.logs
 
         if (payload.verb === 'created') {
-          logs.unshift(payload.data)
-          this.setState({logs})
+          let add = true
+
+          if(this.props.renderType == 'report'){
+            // we dont add those without isProgress
+            if(String(payload.data.isProgress).toLowerCase() != 'true'){
+              add = false
+            }
+          }
+
+          if(add){
+            logs.unshift(payload.data)
+            this.setState({logs})
+          }
+
         }
         else if (payload.verb === 'updated') {
         }
@@ -84,23 +146,16 @@ let
 
     render: function () {
       let items = this.state.logs.map(item => {
-        return (
-          <div key={item.id} className="stream-item">
-            <p className="meta">
-              <span className="author">
-                <Gravatar email={item.author.email} size={20} rating="pg" https default="monsterid" className="CustomAvatar-image" />
-                {item.author.nickname}
-              </span>
-              <span className="datetime"><TimeDisplay datetime={item.createdAt} className=""/></span>
-
-              <span className="clearfix"/>
-            </p>
-
-            <p className="content">
-              {item.content}
-            </p>
-          </div>
-        )
+        if(this.props.renderType) {
+          return (
+            <ReportItemDisplay key={item.id} item={item} />
+          )
+        }
+        else {
+          return (
+            <LogItemDisplay key={item.id} item={item} />
+          )
+        }
       })
 
 
