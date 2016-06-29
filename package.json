@@ -41,8 +41,8 @@
   "main": "app.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/anonymous node/sails user/newsail.git"
+    "url": "https://github.com/yohanip/bozpm.git"
   },
-  "author": "anonymous node/sails user",
-  "license": ""
+  "author": "Yohan <yohanipbdg@gmail.com>",
+  "license": "MIT"
 }
