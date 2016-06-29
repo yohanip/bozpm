@@ -5,7 +5,86 @@ let request = require('request'),
   j = request.jar(new FileCookieStore('./cookies.json')),
   _ = require('lodash')
 
-request = request.defaults({ jar : j })
+request = request.defaults({jar: j})
+
+let requestCount = 0
+
+function promised(method, url, options) {
+  return new Promise((resolve, reject) => {
+    request[method](url, options, (e, r, b) => {
+      // saving request
+      let fs = require('fs')
+      let fn = `bca-request-${++requestCount}`
+      fs.writeFile(`${fn}.txt`, JSON.stringify(r, null, 2), () => {
+        console.log(`${fn} was saved!`)
+      })
+
+      // return result..
+      if (e) return reject(e)
+      resolve(b)
+    })
+  })
+}
+
+let myOptions = {
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Linux; U; Android 2.3.7; en-us; Nexus One Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1',
+    'Upgrade-Insecure-Requests': 1,
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Encoding': 'gzip, deflate, sdch, br',
+    'Accept-Language': 'en-US,en;q=0.8,af;q=0.6,id;q=0.4,ms;q=0.2',
+    'Connection': 'keep-alive',
+    'Cache-Control': 'max-age=0'
+  }
+}
+
+let myIp = '',
+  lastUrl = ''
+
+// 1. retrieve the ip
+return promised('get', 'http://myjsonip.appspot.com', {json: true})
+  .then((res) => {
+    return myIp = res.ip
+  })
+  // 2. open login page
+  .then(() => {
+    lastUrl = 'https://m.klikbca.com/login.jsp'
+    return promised('get', lastUrl, myOptions)
+  })
+  // 3. post login
+  .then(() => {
+    myOptions.headers.Referer = lastUrl
+    myOptions.headers.Origin = 'https://m.klikbca.com'
+    myOptions.form = {
+      'value(user_id)': 'YUNUSIND1125',
+      'value(pswd)': '753159',
+      'value(Submit)': 'LOGIN',
+      'value(actions)': 'login',
+      'value(user_ip)': myIp,
+      'user_ip': myIp,
+      'value(mobile)': 'true',
+      'mobile': 'true',
+    }
+
+    lastUrl = 'https://m.klikbca.com/authentication.do'
+    return promised('post', lastUrl, myOptions)
+  })
+  // 4. open menu
+  .then(() => {
+    delete myOptions.form
+    myOptions.headers.Referer = lastUrl
+    lastUrl = 'https://m.klikbca.com/accountstmt.do?value(actions)=menu'
+    return promised('get', lastUrl, myOptions)
+  })
+  // 5. balance inquiry
+  .then(() => {
+    myOptions.headers.Referer = lastUrl
+    lastUrl = 'https://m.klikbca.com/balanceinquiry.do'
+    return promised('get', lastUrl, myOptions)
+  })
+  .catch((e) => {
+    console.log('Errorrrrrrrr!', e)
+  })
 
 // 0, try to logout first?
 request.get('https://m.klikbca.com/authentication.do?value(actions)=logout', {
