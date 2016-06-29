@@ -7,7 +7,9 @@
   "dependencies": {
     "bcrypt": "^0.8.7",
     "bluebird": "^3.4.1",
+    "cheerio": "^0.20.0",
     "ejs": "2.3.4",
+    "file-cookie-store": "^0.2.1",
     "github": "^1.4.0",
     "grunt": "0.4.5",
     "grunt-contrib-clean": "0.6.0",
@@ -23,10 +25,14 @@
     "grunt-sync": "0.2.4",
     "include-all": "~0.1.6",
     "jsonwebtoken": "^7.0.1",
+    "moment": "^2.13.0",
     "rc": "1.0.1",
+    "request-cookies": "^1.1.0",
+    "request-with-cookies": "0.0.5",
     "sails": "~0.12.3",
     "sails-disk": "~0.10.9",
-    "sails-mongo": "^0.12.0"
+    "sails-mongo": "^0.12.0",
+    "tough-cookie-filestore": "0.0.1"
   },
   "scripts": {
     "debug": "node debug app.js",

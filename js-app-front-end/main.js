@@ -1,7 +1,7 @@
 "use strict"
 
 import { Button, Glyphicon, Modal, Col, Row, Form, FormGroup, FormControl, Navbar, Nav, NavItem, NavDropdown, MenuItem } from 'react-bootstrap'
-import { Router, Route, hashHistory, IndexRoute } from 'react-router'
+import { Router, Route, hashHistory, IndexRoute, Link } from 'react-router'
 import React from 'react'
 import ReactDom from 'react-dom'
 
@@ -26,7 +26,8 @@ let CheckLogin = React.createClass({
     return (
       <div className="full-height flex flex-horizontal">
         <div id="tool-left" className="tool">
-          <Glyphicon glyph="home" className="tool-icon"/>
+          <Link to="/"><Glyphicon glyph="home" className="tool-icon" title="Home"/></Link>
+          {!global.user?<Link to="/register"><Glyphicon glyph="certificate" className="tool-icon" title="Register"/></Link>:null}
         </div>
         <div id="page-content">
           {this.props.children}

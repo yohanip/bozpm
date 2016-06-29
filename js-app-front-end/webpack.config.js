@@ -3,7 +3,7 @@ var webpack = require('webpack');
 
 module.exports = {
   entry: './main.js',
-  output: { path: path.join(__dirname, '..', 'assets', 'js'), filename: 'front-end-app.js' },
+  output: { path: path.join(__dirname, '..', 'assets', 'js-app'), filename: 'front-end-app.js' },
   module: {
     loaders: [
       {
