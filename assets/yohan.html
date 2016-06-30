@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/styles/jquery-ui.css"/>
+    <link rel="stylesheet" href="/styles/jquery-ui.structure.css"/>
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        .list {
+            position: relative;
+            height: 100%;
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ui-state-highlight {
+            height: 35px;
+        }
+
+        .list-item {
+            width: 50px;
+            margin: 5px 0;
+            line-height: 35px;
+            border: 1px solid black;
+            padding-left: 3em;
+        }
+
+        #line-highlight {
+            position: absolute;
+            width: 40px;
+            height: 3px;
+            margin: 0;
+            padding: 0;
+            line-height: 3px;
+            background-color: red;
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+
+<script src="/js/dependencies/jquery-1.12.4.min.js"></script>
+<script src="/js/dependencies/jquery-ui.js"></script>
+<script src="/js/dependencies/jquery-ui.js"></script>
+
+<div id="line-highlight"></div>
+
+<div class="list drag drop" id="s-main">
+    <div class="list-item drag drop" id="s-1">1</div>
+    <div class="list-item drag drop" id="s-2">2</div>
+    <div class="list-item drag drop" id="s-3">3</div>
+    <div class="list-item drag drop" id="s-4">4</div>
+    <div class="list-item drag drop" id="s-5">5</div>
+    <div class="list-item drag drop" id="s-6">6</div>
+    <div class="list-item drag drop" id="s-7">7</div>
+</div>
+
+<script>
+    var currentOver = []
+
+    jQuery(function ($) {
+//        $('.sortable').sortable({
+//            // revert: true,
+//            connectWith: '.sortable',
+//            placeholder: "ui-state-highlight",
+//            dropOnEmpty: true,
+//            forcePlaceholderSize: true
+//        })
+        var hl = $('#line-highlight')
+
+        $('.drag').draggable({
+            helper: "clone",
+            opacity: 0.5,
+            scroll: false,
+            drag: function (event, ui) {
+                if (currentOver.length > 0) {
+                    var tgt = $(currentOver[currentOver.length - 1]),
+                            childrens = tgt.children()
+
+                    if (childrens.length > 0) {
+                        hl.show()
+
+                        var lastItem = true
+
+                        // var childrens = $(tgt).children()
+                        childrens.each(function (i, dom) {
+                            if(dom == ui.helper[0]) return true
+
+                            var offset = $(dom).offset()
+                            if (ui.offset.top < offset.top + $(dom).outerHeight()) {
+                                lastItem = false
+                                hl.css({
+                                    left: offset.left,
+                                    top: offset.top
+                                })
+                            }
+                            // return false
+                            return lastItem
+                        })
+
+                        if (lastItem) {
+                            console.log(lastItem)
+                            hl.css({
+                                left: tgt.offset().left,
+                                top: tgt.offset().top + tgt.outerHeight()
+                            })
+                        }
+                    }
+                    else {
+                        hl.hide()
+                    }
+                }
+            },
+            stop: function (event, ui) {
+                var parent = currentOver.pop(),
+                        ownParent = false
+
+                if (parent) {
+                    console.log(this)
+                    ownParent = $(this).parent()[0] == parent
+
+                    if (!ownParent) {
+                        // let's append that..
+                        $(this).detach().appendTo(parent)
+                    }
+                    else {
+                        // let's move our child..
+                    }
+                }
+
+                currentOver = []
+            }
+        })
+
+        $('.drop').droppable({
+            over: function (event, ui) {
+                // console.log('over', this)
+                currentOver.push(this)
+            },
+            out: function (event, ui) {
+                // console.log('out', this)
+                currentOver.pop()
+            }
+        })
+    })
+
+
+</script>
+
+</body>
+</html>
