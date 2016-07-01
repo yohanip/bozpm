@@ -21,12 +21,31 @@
             height: 35px;
         }
 
+        .hilite-bg {
+            background-color: #EEEEEE;
+        }
+
         .list-item {
-            width: 50px;
+            width: 100%;
             margin: 5px 0;
+            padding: 0;
             line-height: 35px;
-            border: 1px solid black;
-            padding-left: 3em;
+        }
+
+        .list-item .data-line{
+            width: 100%;
+            margin: 0;
+            padding: 0
+            padding: 0;
+        }
+
+        .data-line .title {
+            box-sizing: border-box;
+            display: inline-block;
+            width: 100px;
+        }
+
+        .data-line .description {
         }
 
         #line-highlight {
@@ -43,112 +62,381 @@
 </head>
 <body>
 
+<div id="app"></div>
+
 <script src="/js/dependencies/jquery-1.12.4.min.js"></script>
 <script src="/js/dependencies/jquery-ui.js"></script>
 <script src="/js/dependencies/jquery-ui.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+<script src="https://fb.me/react-15.1.0.min.js"></script>
+<script src="https://fb.me/react-dom-15.1.0.min.js"></script>
 
 <div id="line-highlight"></div>
 
-<div class="list drag drop" id="s-main">
-    <div class="list-item drag drop" id="s-1">1</div>
-    <div class="list-item drag drop" id="s-2">2</div>
-    <div class="list-item drag drop" id="s-3">3</div>
-    <div class="list-item drag drop" id="s-4">4</div>
-    <div class="list-item drag drop" id="s-5">5</div>
-    <div class="list-item drag drop" id="s-6">6</div>
-    <div class="list-item drag drop" id="s-7">7</div>
-</div>
+<script type="text/babel">
+    var App = React.createClass({
 
-<script>
-    var currentOver = []
+        getInitialState: function() {
+            var a = []
 
-    jQuery(function ($) {
-//        $('.sortable').sortable({
-//            // revert: true,
-//            connectWith: '.sortable',
-//            placeholder: "ui-state-highlight",
-//            dropOnEmpty: true,
-//            forcePlaceholderSize: true
-//        })
-        var hl = $('#line-highlight')
+            for(var i=1;i<=7;i++){
+                a.push({id: i})
+            }
 
-        $('.drag').draggable({
-            helper: "clone",
-            opacity: 0.5,
-            scroll: false,
-            drag: function (event, ui) {
-                if (currentOver.length > 0) {
-                    var tgt = $(currentOver[currentOver.length - 1]),
-                            childrens = tgt.children()
+            // var data = this.plainTree(a, 0)
 
-                    if (childrens.length > 0) {
-                        hl.show()
+            // console.log(a, data)
 
-                        var lastItem = true
+            return {
+                tree: a,
+                // data: data
+            }
+        },
 
-                        // var childrens = $(tgt).children()
-                        childrens.each(function (i, dom) {
-                            if(dom == ui.helper[0]) return true
+        // a linear representation of our tree
+        plainTree: function (tree, level) {
+            var data = []
 
-                            var offset = $(dom).offset()
-                            if (ui.offset.top < offset.top + $(dom).outerHeight()) {
-                                lastItem = false
-                                hl.css({
-                                    left: offset.left,
-                                    top: offset.top
-                                })
+            function recurse(item, level) {
+                item.level = level
+                data.push(item)
+
+                if(item.childrenNodes){
+                    $.each(item.childrenNodes, function(i, it){
+                        it.parentNode = item
+                        recurse(it, level + 1)
+                    })
+                }
+            }
+
+            $.each(tree, function(i, leaf){
+                // console.log(leaf)
+                recurse(leaf, level)
+            })
+
+            console.log(data)
+
+            return data
+        },
+
+        findData: function(data, id) {
+            var idx = -1
+            data.some(function(item, i) {
+                if(item.id == id) {
+                    idx = i
+                    return true
+                }
+            })
+            return idx
+        },
+
+        add: function() {
+
+        },
+
+        dragdropable: function(){
+            var hl = $('#line-highlight'),
+                    rr = this
+
+            function findRealDOMDropTarget(elements) {
+                var ele = []
+
+                $.each(elements, function(i, dom){
+                    if($(dom).hasClass('drop')) ele.push(dom)
+                })
+
+                // because element 0 will always be the helper..
+                if(ele.length>0){
+                    return ele[1]
+                }
+                else {
+                    return null
+                }
+            }
+
+            //check that a dom should not positioned at it self and it's children..
+            function checkDeepDomParent(potentialChild, parent) {
+                if(!(parent instanceof jQuery)) {
+                    parent = $(parent)
+                }
+
+                if(!(potentialChild instanceof jQuery)) {
+                    potentialChild = $(potentialChild)
+                }
+
+                // if we are moving on our own parent,this is true
+                if(parent[0] == potentialChild[0].parentElement) {
+                    // console.log('moving inside our own parent..')
+                    return true
+                }
+
+                // if we are moving into our self..
+                if(parent[0] == potentialChild[0]) {
+                    // console.log('moving into our self')
+                    return false
+                }
+
+                var okeh = true
+
+                // console.log('here')
+
+                var parents = parent.parent('.drop')
+
+                // check the children..
+                parents.each(function(i, dom){
+                    // console.log('checked:', dom, okeh)
+                    if(!okeh) return false
+                    okeh = checkDeepDomParent(potentialChild, dom)
+                    // console.log('checked:', dom, okeh)
+                })
+
+                return okeh
+            }
+
+            $('.drag').draggable({
+                helper: "clone",
+                opacity: 0.5,
+                scroll: false,
+                drag: function (event, ui) {
+                    // fetch elements under the mouse
+                    var elements = document.elementsFromPoint(event.clientX, event.clientY),
+                            target = findRealDOMDropTarget(elements)
+
+                    if(target){
+                        target = $(target)
+                        // remove previous highlight
+                        $('.hilite-bg').removeClass('hilite-bg')
+                        // highlight the current
+                        target.addClass('hilite-bg')
+
+                        // check if target have children..
+                        var children = target.children('.drop')
+
+                        if (children.length > 0) {
+                            hl.show()
+
+                            var mouseY = event.pageY,
+                                    prependLast = true
+
+                            children.each(function (i, dom) {
+                                var offset = $(dom).offset()
+
+                                if (offset.top > mouseY) {
+                                    hl.css({top: offset.top})
+                                    prependLast = false
+                                    return false
+                                }
+                            })
+
+                            if (prependLast) {
+                                var lastChildIdx = children.length - 1
+                                // cek siapa tahu anak terakhir merupakan 'clone' helper drag..
+                                if (children[lastChildIdx] == ui.helper[0])
+                                    --lastChildIdx
+
+                                var t = children.eq(lastChildIdx).offset().top + children.eq(lastChildIdx).outerHeight() + 5
+                                hl.css({top: t})
                             }
-                            // return false
-                            return lastItem
-                        })
+                        }
+                        else {
+                            hl.hide()
+                        }
+                    }
 
-                        if (lastItem) {
-                            console.log(lastItem)
-                            hl.css({
-                                left: tgt.offset().left,
-                                top: tgt.offset().top + tgt.outerHeight()
+                },
+
+                stop: function (event, ui) {
+                    $('.hilite-bg').removeClass('hilite-bg')
+                    hl.hide()
+
+                    function moveToParent(childJDOM, targetJDOM, atPos){
+                        if(!(childJDOM instanceof jQuery)) childJDOM = $(childJDOM)
+                        if(!(targetJDOM instanceof jQuery)) targetJDOM = $(targetJDOM)
+
+                        // update the positions..
+                        // get the target position..
+                        var targetId = targetJDOM.attr('id').split('-')
+                        var childId = childJDOM.attr('id').split('-')
+
+                        // data bank
+                        var tree = rr.state.tree
+                        var data = rr.plainTree(tree, 0)
+
+                        // find data index from our linear tree representation
+                        var targetIdx = rr.findData(data, targetId[1])
+                        var childIdx = rr.findData(data, childId[1])
+
+                        // our states data..
+                        var parent = targetIdx >= 0 ? data[targetIdx] : null
+                        var child = data[childIdx]
+                        var lastParent = child.parentNode
+
+                        // removing the child from old parent..
+                        if(lastParent){
+                            var childPos = lastParent.childrenNodes.indexOf(child)
+                            if(childPos >= 0){
+                                console.log('removing from ', lastParent)
+                                lastParent.childrenNodes.splice(childPos, 1)
+                            }
+                        }
+                        else {
+                            // removing the child from tree root
+                            var childPos = tree.indexOf(child)
+                            if(childPos >= 0){
+                                console.log('removing from tree')
+                                tree.splice(childPos, 1)
+                            }
+                        }
+
+                        if(!parent){
+                            // we are inserting to the tree..
+                            console.log('to tree', 'pos', atPos)
+                            child.parentNode = null
+                            child.level = 0
+                            tree.splice(atPos, 0, child)
+
+                            // calculate the level and other attributes..
+                            rr.plainTree(tree, 0)
+
+                            rr.setState({
+                                tree: tree,
+                                // data: data
+                            })
+                        }
+                        else {
+                            if(!parent.childrenNodes)
+                                parent.childrenNodes = []
+
+                            console.log('to parent', parent, 'pos', atPos)
+
+                            // insert
+                            parent.childrenNodes.splice(atPos, 0, child)
+
+                            child.parentNode = parent
+                            child.level = parent.level + 1
+
+                            // calculate the level and other attributes..
+                            rr.plainTree(tree, 0)
+
+                            // console.log(tree)
+
+                            rr.setState({
+                                tree: tree,
+                                // data: data
                             })
                         }
                     }
-                    else {
-                        hl.hide()
+
+                    // get the element under the cursor..
+                    var elements = document.elementsFromPoint(event.clientX, event.clientY),
+                        target = findRealDOMDropTarget(elements)
+
+                    if(target) {
+                        // console.log('target', target)
+                        target = $(target)
+
+                        var children = target.children('.drop')
+                        var that = this
+
+                        // we can't move ourself inside our self..
+                        //if(this == target[0]) return;
+                        if(!checkDeepDomParent(this, target)) return;
+
+                        if (children.length > 0) {
+                            // where should we insert our element?
+                            var mouseY = event.pageY,
+                                    prependLast = true,
+                                    idx = -1
+
+                            children.each(function (i, dom) {
+                                var offset = $(dom).offset()
+
+                                if (offset.top > mouseY) {
+                                    idx = i
+                                    prependLast = false
+                                }
+
+                                return prependLast
+                            })
+
+                            // console.log(idx, prependLast)
+
+                            if (idx >= 0) {
+                                moveToParent(this, target, idx)
+                            }
+
+                            if (prependLast) {
+                                moveToParent(this, target, children.length)
+                            }
+                        }
+                        else {
+                            // append directly
+                            moveToParent(this, target, 0)
+                        }
                     }
                 }
-            },
-            stop: function (event, ui) {
-                var parent = currentOver.pop(),
-                        ownParent = false
+            })
 
-                if (parent) {
-                    console.log(this)
-                    ownParent = $(this).parent()[0] == parent
-
-                    if (!ownParent) {
-                        // let's append that..
-                        $(this).detach().appendTo(parent)
-                    }
-                    else {
-                        // let's move our child..
-                    }
+            $('.drop').droppable({
+                out: function (event, ui) {
+                    $('.hilite-bg').removeClass('hilite-bg')
                 }
+            })
+        },
 
-                currentOver = []
-            }
-        })
+        componentDidMount: function(){
+            this.dragdropable()
+        },
 
-        $('.drop').droppable({
-            over: function (event, ui) {
-                // console.log('over', this)
-                currentOver.push(this)
-            },
-            out: function (event, ui) {
-                // console.log('out', this)
-                currentOver.pop()
+        componentDidUpdate: function(){
+            this.dragdropable()
+        },
+
+        render: function() {
+
+            var a = this.state.tree.map(function(leaf){
+                return <DataLine key={leaf.id} item={leaf}/>
+            })
+
+            return (
+                <div>
+                    <div className="list drag drop" id="s-main">
+                        {a}
+                    </div>
+                    <button onClick={this.add}>Add</button>
+                </div>
+
+            )
+        }
+    })
+
+    var DataLine = React.createClass({
+        render: function() {
+            var item = this.props.item
+            var children = null
+
+            if(this.props.item.childrenNodes){
+                children = this.props.item.childrenNodes.map(function(child){
+                    return <DataLine key={child.id} item={child}/>
+                })
             }
-        })
+
+            return (
+                <div key={item.id} id={'listitemhere-' + item.id} className="list-item drag drop">
+                    <div className="data-line">
+                        <span className="title" style={{paddingLeft: item.level * 15}}>{item.id}:{item.level}</span>
+                        <span className="description" style={{paddingLeft: 5}}>Description here!</span>
+                    </div>
+
+                    {children}
+
+                </div>
+            )
+        }
     })
 
 
+    ReactDOM.render(<App />, document.getElementById('app'))
 </script>
 
 </body>
