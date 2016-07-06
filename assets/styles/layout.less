@@ -51,6 +51,29 @@
   flex: 1;
 }
 
+#tree-container{
+  flex: 1;
+}
+
+#comments-container{
+  width: 300px;
+  background-color: @darkPrimaryColor;
+  color: @lightPrimaryColor;
+  .drop-shadow(-2px, 0, 5px);
+
+  #comments-top-section{
+    .inner-shadow(2px, 2px, 15px, 1px, 0.5);
+    background-color: @darkPrimaryColor;
+    padding: 0.5em;
+    text-align: center;
+  }
+
+  #comments-bottom-section{
+    flex: 1;
+    padding: 0.5em;
+  }
+}
+
 #the-tasks {
   #task-tree {
     padding: 1em;
@@ -105,6 +128,7 @@
   display: inline-block;
   width: 80px;
   height: 0.6em;
+  line-height: 0.6em;
   vertical-align: middle;
   margin-bottom: 0;
 }
@@ -116,4 +140,9 @@
   }
 }
 
+.data-line{
+  .title{
+    flex: 1
+  }
+}
 

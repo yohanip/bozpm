@@ -20,8 +20,8 @@ let TimeDisplay = React.createClass({
 
 
       // if they are larger than 2 days ago.. shows the normal date
-      if(c >= 3 * 86400000) {
-        text = a.format('ddd, MMM Do YY, h:mm:ss a')
+      if(c <= -2 * 86400000) {
+        text = a.format('ddd, MMM Do YY h:mm a')
       } else {
         text = a.from(b)
       }

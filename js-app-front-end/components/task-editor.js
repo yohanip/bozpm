@@ -55,8 +55,8 @@ let TaskEditor = React.createClass({
   save: function (e) {
     e.preventDefault()
 
-    let payload = _.omit(this.state, 'children,activeUsers'.split(',')),
-      taskWas = _.omit(this.props.task, 'children')
+    let payload = _.omit(this.state, 'childrenNodes,activeUsers,parentNode'.split(',')),
+      taskWas = _.omit(this.props.task, 'childrenNodes,parentNode'.split(','))
 
     // alert(this.state.title + this.state.description)
     if (this.props.task && this.props.task.id) {
@@ -75,10 +75,12 @@ let TaskEditor = React.createClass({
       )
     })
 
+    let ifParented = this.props.parent ? '@' + this.props.parent.title : '@root'
+
     return (
       <Modal show={this.props.visible} onHide={this.close} onShow={this.onShow}>
         <Modal.Header closeButton={true}>
-          <Modal.Title>Task Editor</Modal.Title>
+          <Modal.Title>Task Editor {ifParented}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form horizontal={true} onSubmit={this.save}>

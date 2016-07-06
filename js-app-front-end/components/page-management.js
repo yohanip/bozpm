@@ -3,7 +3,8 @@
 import { Button, Glyphicon, Modal, Col, Row, Form, FormGroup, FormControl, Tabs, Tab } from 'react-bootstrap'
 
 let
-  TaskSection = require('./task-section'),
+  // TaskSection = require('./task-section'),
+  TaskSection = require('./task-tree'),
   Streamer = require('./stream')
 
 let React = require('react'),

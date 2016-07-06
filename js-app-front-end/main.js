@@ -10,8 +10,21 @@ let PageLogin = require('./components/page-login')
 let PageRegister = require('./components/page-register')
 
 let CheckLogin = React.createClass({
+  getInitialState: function () {
+    return {
+      disconnected: false
+    }
+  },
+
   componentDidMount: function () {
     // console.log('mounted!')
+    io.socket.on('connect', () => {
+      this.setState({disconnected: false})
+    })
+
+    io.socket.on('disconnect', () => {
+      this.setState({disconnected: true})
+    })
   },
 
   componentWillMount: function () {
@@ -27,7 +40,13 @@ let CheckLogin = React.createClass({
       <div className="full-height flex flex-horizontal">
         <div id="tool-left" className="tool">
           <Link to="/"><Glyphicon glyph="home" className="tool-icon" title="Home"/></Link>
-          {!global.user?<Link to="/register"><Glyphicon glyph="certificate" className="tool-icon" title="Register"/></Link>:null}
+
+          <Glyphicon
+            glyph="alert" className="tool-icon infinite-scaling" title="Alert! Server is gone!"
+            style={{display: this.state.disconnected ? 'inline-block':'none'}}/>
+
+          {!global.user ?
+            <Link to="/register"><Glyphicon glyph="certificate" className="tool-icon" title="Register"/></Link> : null}
         </div>
         <div id="page-content">
           {this.props.children}

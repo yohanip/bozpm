@@ -7,8 +7,96 @@
 
 "use strict"
 
+let Promise = require('bluebird')
+
+function findChildren(parent, req, res) {
+  return sails.models.task
+    .find({
+      where: {
+        parent: parent.id
+      },
+      sort: 'position asc'
+    })
+    .then(tasks => {
+      if (tasks.length > 0) {
+        parent.childrenNodes = tasks
+
+        if (req.isSocket) {
+          sails.models.task.subscribe(req, tasks)
+        }
+      }
+
+      return Promise.each(tasks, task => {
+        return findChildren(task, req, res)
+      })
+    })
+}
+
 module.exports = {
   // override blueprint here..
+  find: function (req, res, next) {
+    // find all includes it children..
+
+    return sails.models.task
+      .find({
+        where: {
+          parent: ['', null]
+        },
+        sort: 'position asc'
+      })
+      .then(tasks => {
+        // automatically subscribing to create events..
+        sails.models.task.watch(req)
+
+        return Promise.each(tasks, task => {
+          if (req.isSocket) {
+            sails.models.task.subscribe(req, tasks)
+          }
+
+          return findChildren(task, req, res)
+        }).then(() => tasks)
+      })
+      .then(tasks => res.send(tasks))
+      .catch(e => res.negotiate(e))
+  },
+
+  update: function (req, res, next) {
+    let pk = req.param('id')
+    return sails.models.task.findOne(pk)
+      .then(item => {
+        if (!item) return res.notFound()
+
+        // update the progress of previous task parent..
+        let lastParentId = item.parent
+
+        let lastData = _.cloneDeep(item)
+
+        return sails.models.task.update(pk, req.body).then(records => {
+          if(lastParentId)
+            sails.models.task.updateParentTaskProgress(lastParentId)
+
+          return [
+            lastData, records[0]
+          ]
+        })
+      })
+      .spread((oldData, newData) => {
+        // re-find the last data..
+        return sails.models.task.findOne(newData.id)
+          .then(updatedData => {
+            sails.models.task.publishUpdate(pk, req.body, null, {
+              previous: oldData
+            })
+
+            // updating progress for the new parent..
+            sails.models.task.updateParentTaskProgress(updatedData.parent)
+
+            res.ok(updatedData)
+          })
+      })
+      .catch(err => res.negotiate(err))
+  },
+
   create: function (req, res, next) {
     let p
 

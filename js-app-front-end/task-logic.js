@@ -3,6 +3,7 @@
 let fetch = require('./helpers/fetch'),
   Promise = require('bluebird'),
   StreamLogic = require('./stream-logic'),
+  _ = require('lodash'),
   TaskLogic = {
 
     remove: function (taskId) {
@@ -20,9 +21,15 @@ let fetch = require('./helpers/fetch'),
     },
 
     edit: function (taskId, editedFields, oldFields, log) {
+      if(_.isPlainObject(editedFields.color) && editedFields.color.hex) {
+        editedFields.color = editedFields.color.hex
+      }
+
       return fetch('put', '/task/' + taskId, editedFields)
         .then(payload => {
           if (log === false) return true
+
+          // console.log('here..', editedFields, oldFields)
 
           if (payload.status == 200) {
             StreamLogic.add(global.user, JSON.stringify({msg: 'Edit Task', to: editedFields, was: oldFields}, null, 2))
@@ -43,7 +50,7 @@ let fetch = require('./helpers/fetch'),
       }
 
       return fetch('post', '/task', payload)
-        .then(() => {
+        .then((payload) => {
 
           if (payload.status == 200) {
             StreamLogic.add(global.user, JSON.stringify({msg: 'Adding Task', newTask}, null, 2))
@@ -53,7 +60,7 @@ let fetch = require('./helpers/fetch'),
           }
 
         })
-        .catch(err => alert('Create Task: ' + err))
+        .catch(err => alert('Error Create Task: ' + err))
     },
 
     recursiveFindTaskChildren: function (socket, targetTask) {

@@ -62,7 +62,7 @@ let CommentEditor = React.createClass({
     return (
       <Modal show={this.props.visible} onHide={this.close} onShow={this.onShow}>
         <Modal.Header closeButton={true}>
-          <Modal.Title>Comment Editor</Modal.Title>
+          <Modal.Title>Comment Editor @{this.props.task.title}</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>

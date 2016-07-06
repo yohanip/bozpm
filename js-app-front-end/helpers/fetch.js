@@ -25,7 +25,7 @@ module.exports = function (method, url, data) {
           return reject('Server Offline')
 
         return resolve({
-          status: xhr.status,
+          status: xhr.statusCode,
           data: xhr.statusText
         })
       }
