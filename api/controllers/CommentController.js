@@ -29,10 +29,14 @@ module.exports = {
           if (tasks.length > 0) throw {status: 400, error: 'Could not set progress on this task (it have children)'}
 
           // next, let's verify the task progressed..
-          return sails.models.task.findOne(req.body.taskId)
+          return sails.models.task.findOne({id: req.body.taskId})
         })
         .then(task => {
           if (!task) throw 'Invalid task!'
+
+          // check if this task has a specific assignee
+          if (task.assignedTo && (task.assignedTo.id != req.token))
+            throw {status: 400, error: 'Sorry, this task is assigned for: ' + task.assignedTo.nickname}
 
           // update task progress..
           return sails.models.task
@@ -53,7 +57,7 @@ module.exports = {
       .then((task) => {
         let payload = _.extend({author: req.token}, req.body)
 
-        if(task) payload.taskTitle = task.title
+        if (task) payload.taskTitle = task.title
 
         return sails.models.comment
           .create(payload)

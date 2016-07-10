@@ -12,7 +12,9 @@ module.exports = {
 
   updateParentTaskProgress: function (parentId) {
     return sails.models.task
-      .findOne(parentId)
+      .findOne({
+        id: parentId
+      })
       .then((task) => {
         if (task) {
           // get the children..
@@ -34,7 +36,7 @@ module.exports = {
 
         tasks.forEach(t => {
           let progress = parseInt(t.progress)
-          if(isFinite(progress))
+          if (isFinite(progress))
             total += progress
         })
 
@@ -53,13 +55,13 @@ module.exports = {
             sails.models.task.publishUpdate(updated[0].id, {progress: updated[0].progress})
 
             // if having parent, update that parent progress..
-            if(task.parent){
+            if (task.parent) {
               return sails.models.task.updateParentTaskProgress(task.parent)
             }
           })
       })
       .catch((e) => {
-        if (e !== 10002) sails.logger.error(e)
+        if (e !== 10002) sails.log.error(e)
         return false
       })
 
