@@ -1,0 +1,59 @@
+#s-main {
+  padding: 1em;
+
+  .data-line {
+    margin-bottom: 0.5em;
+  }
+
+  .currently {
+    width: 5px;
+    //height: 1em;
+    //line-height: 1em;
+    vertical-align: text-top;
+    margin-right: 0.5em;
+    display: inline-block;
+  }
+
+  .currently.selected {
+    background-color: red;
+  }
+
+  .list-item {
+    position: relative;
+  }
+
+  .tree-line-left {
+    content: "";
+    display: block;
+    width: 0;
+    position: absolute;
+    top: 1.4em;
+    bottom: 0;
+    left: 0;
+    border-left: 1px solid;
+  }
+
+  .tree-line-dash {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0.65em;
+    left: 0;
+    width: 0.65em;
+    border-top: 1px solid;
+  }
+
+  .tree-line-eraser {
+    background: #F5F5F5; /* same with body background */
+    display: block;
+    position: absolute;
+    height: auto;
+    width: 0.65em;
+    top: 0.68em; /* (line-height/2) */
+    bottom: 0;
+  }
+}
+
+.hilite-bg {
+  background-color: #EEEEEE;
+}

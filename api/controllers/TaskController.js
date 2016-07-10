@@ -145,8 +145,10 @@ module.exports = {
         req.body.position = max + 1
         req.body.author = _.pick(req.token, 'id,email,nickname'.split(','))
 
+        let newTaskData = req.body
+
         return sails.models.task
-          .create(req.body)
+          .create(newTaskData)
           .then(newTask => {
             sails.models.task.publishCreate(newTask)
             res.send(newTask)
