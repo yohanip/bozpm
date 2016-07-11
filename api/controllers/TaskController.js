@@ -36,13 +36,12 @@ module.exports = {
   // override blueprint here..
   find: function (req, res, next) {
     // find all includes it children..
-
     return sails.models.task
       .find({
         where: {
           parent: ['', null]
         },
-        sort: 'position asc'
+        sort: 'position ASC'
       })
       .then(tasks => {
         // automatically subscribing to create events..
@@ -70,6 +69,13 @@ module.exports = {
         let lastParentId = item.parent
 
         let lastData = _.cloneDeep(item)
+
+        if(req.body.position){
+          req.body.position = parseInt(req.body.position)
+        }
+        else {
+          req.body.position = 10000
+        }
 
         return sails.models.task.update(pk, req.body).then(records => {
           if(lastParentId)
@@ -117,7 +123,7 @@ module.exports = {
             where: {
               parent: req.body.parent
             },
-            sort: 'position desc',
+            sort: 'position DESC',
           })
         })
         .then(task => {
@@ -132,7 +138,7 @@ module.exports = {
           where: {
             or: [{parent: null}, {parent: ''}]
           },
-          sort: 'position desc',
+          sort: 'position DESC',
         })
         .then(task => {
           if (!task) return 0
