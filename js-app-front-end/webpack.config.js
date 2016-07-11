@@ -1,9 +1,18 @@
 var path = require('path');
 var webpack = require('webpack');
+var minimize = process.argv.indexOf('--minimize') !== -1,
+  plugins = [];
+
+if (minimize) {
+  plugins.push(new webpack.optimize.UglifyJsPlugin({
+    compress: {warnings: false}
+  }));
+}
 
 module.exports = {
   entry: './main.js',
-  output: { path: path.join(__dirname, '..', 'assets', 'js-app'), filename: 'front-end-app.js' },
+  output: {path: path.join(__dirname, '..', 'assets', 'js-app'), filename: 'front-end-app.js'},
+  plugins: plugins,
   module: {
     loaders: [
       {
