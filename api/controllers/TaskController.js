@@ -36,13 +36,12 @@ module.exports = {
   // override blueprint here..
   find: function (req, res, next) {
     // find all includes it children..
-
     return sails.models.task
       .find({
         where: {
           parent: ['', null]
         },
-        sort: 'position asc'
+        sort: 'position ASC'
       })
       .then(tasks => {
         // automatically subscribing to create events..
@@ -62,7 +61,7 @@ module.exports = {
 
   update: function (req, res, next) {
     let pk = req.param('id')
-    return sails.models.task.findOne({id: pk})
+    return sails.models.task.findOne(pk)
       .then(item => {
         if (!item) return res.notFound()
 
@@ -70,6 +69,13 @@ module.exports = {
         let lastParentId = item.parent
 
         let lastData = _.cloneDeep(item)
+
+        if(req.body.position){
+          req.body.position = parseInt(req.body.position)
+        }
+        else {
+          req.body.position = 10000
+        }
 
         return sails.models.task.update(pk, req.body).then(records => {
           if(lastParentId)
@@ -82,7 +88,7 @@ module.exports = {
       })
       .spread((oldData, newData) => {
         // re-find the last data..
-        return sails.models.task.findOne({id: newData.id})
+        return sails.models.task.findOne(newData.id)
           .then(updatedData => {
             sails.models.task.publishUpdate(pk, req.body, null, {
               previous: oldData
@@ -104,19 +110,20 @@ module.exports = {
       // check the validity of that parent..
       p = sails.models.task
         .findOne({
-          id: req.body.parent
+          where: {
+            id: req.body.parent
+          }
         })
         .then(task => {
           if (!task) throw 'Invalid Parent!'
         })
         .then(() => {
           // count the children..
-          return sails.models.task.find({
+          return sails.models.task.findOne({
             where: {
               parent: req.body.parent
             },
-            sort: 'position desc',
-            limit: 1
+            sort: 'position DESC',
           })
         })
         .then(task => {
@@ -127,12 +134,11 @@ module.exports = {
     // no parent
     else {
       p = sails.models.task
-        .find({
+        .findOne({
           where: {
             or: [{parent: null}, {parent: ''}]
           },
-          sort: 'position desc',
-          limit: 1
+          sort: 'position DESC',
         })
         .then(task => {
           if (!task) return 0
@@ -165,7 +171,7 @@ module.exports = {
   },
 
   destroy: function (req, res, next) {
-    return sails.models.task.findOne({id: req.params.id})
+    return sails.models.task.findOne(req.params.id)
       .then(task => {
         if (!task) throw {status: 400, err: 'No task found!'}
 

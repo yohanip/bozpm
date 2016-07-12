@@ -97,7 +97,7 @@ let CommentEditor = React.createClass({
                       handleChange={e => this.setState({timeTaken:e.target.value})}
                       step={1}
                       max={8}
-                      min={1}/>
+                      min={0}/>
                   </Col>
                   <Col sm={1}>
                     {this.state.timeTaken}

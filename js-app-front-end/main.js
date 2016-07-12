@@ -12,7 +12,18 @@ let PageRegister = require('./components/page-register')
 let CheckLogin = React.createClass({
   getInitialState: function () {
     return {
-      disconnected: false
+      disconnected: false,
+      isLoading: true,
+    }
+  },
+
+  setLoading: function (isLoading) {
+    this.setState({isLoading})
+  },
+
+  getChildContext() {
+    return {
+      setLoading: this.setLoading
     }
   },
 
@@ -44,6 +55,10 @@ let CheckLogin = React.createClass({
           <Glyphicon
             glyph="alert" className="tool-icon infinite-scaling" title="Alert! Server is gone!"
             style={{display: this.state.disconnected ? 'inline-block':'none'}}/>
+
+          <Glyphicon
+            glyph="cog" className="tool-icon gly-spin" title="Loading.."
+            style={{display: this.state.isLoading ? 'inline-block':'none'}}/>
 
           {!global.user ?
             <Link to="/register"><Glyphicon glyph="certificate" className="tool-icon" title="Register"/></Link> : null}
@@ -113,5 +128,10 @@ let MainApp = React.createClass({
     )
   }
 })
+
+// global contexts..
+CheckLogin.childContextTypes = {
+  setLoading: React.PropTypes.func
+};
 
 ReactDom.render(<MainApp />, document.getElementById('my-app'))

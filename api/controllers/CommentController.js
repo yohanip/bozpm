@@ -17,6 +17,15 @@ module.exports = {
       req.body.isProgress = String(req.body.isProgress).toLowerCase() === 'true'
     }
 
+    // progress and timeTaken should be integer
+    ['progress', 'timeTaken'].forEach(v => {
+      let val = parseInt(req.body[v])
+      if(!_.isFinite(val))
+        val = 0
+
+      req.body[v] = val
+    })
+
     if (req.body.isProgress) {
       //check if the posted task has children?
       p = sails.models.task

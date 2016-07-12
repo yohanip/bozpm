@@ -317,10 +317,15 @@ let TaskTree = React.createClass({
       Authorization: 'Bearer ' + global.user.token
     }
 
+    this.context.setLoading(true)
+
     io.socket.get('/task', (tree, resp) => {
       if (resp.statusCode == 200) {
         this.plainTree(tree, 0)
-        this.setState({tree: tree, current: (tree.length > 0) ? tree[0] : null})
+        this.setState({tree: tree, current: (tree.length > 0) ? tree[0] : null}, () => {
+          // set loading as off..
+          this.context.setLoading(false)
+        })
       }
       else {
         alert('error fetching data..' + resp.statusText)
@@ -613,7 +618,7 @@ let DataLine = React.createClass({
         <div className="data-line flex flex-horizontal">
           <span className={cn + ' currently'}></span>
           <span className="title" style={{paddingLeft: (task.level ? task.level : 0) * 15}}>
-            {task.title}
+            {task.title} ({task.position})
             {hideUnhideChildren}
             {thumbs}
           </span>
@@ -657,6 +662,10 @@ TaskTree.childContextTypes = {
   currentData: React.PropTypes.object,
   showEditor: React.PropTypes.func,
   setCommented: React.PropTypes.func,
+}
+
+TaskTree.contextTypes = {
+  setLoading: React.PropTypes.func
 }
 
 DataLine.contextTypes = {

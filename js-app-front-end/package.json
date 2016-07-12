@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "pack": "webpack",
+    "pack": "webpack --minimize",
     "watch": "webpack-dev-server --progress --colors --port 8585"
   },
   "author": "",
