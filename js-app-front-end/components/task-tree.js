@@ -618,9 +618,7 @@ let DataLine = React.createClass({
         <div className="data-line flex flex-horizontal">
           <span className={cn + ' currently'}></span>
           <span className="title" style={{paddingLeft: (task.level ? task.level : 0) * 15}}>
-            {task.title} ({task.position})
-            {hideUnhideChildren}
-            {thumbs}
+            {task.title} ..{task.position} {hideUnhideChildren} {thumbs}
           </span>
           <span className="progress">{progress}</span>
           <span className="task-toolbar">

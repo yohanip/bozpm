@@ -61,7 +61,7 @@ module.exports = {
 
   update: function (req, res, next) {
     let pk = req.param('id')
-    return sails.models.task.findOne(pk)
+    return sails.models.task.findOne({id: pk})
       .then(item => {
         if (!item) return res.notFound()
 
@@ -70,21 +70,44 @@ module.exports = {
 
         let lastData = _.cloneDeep(item)
 
-        if(req.body.position){
+        if (req.body.position) {
           req.body.position = parseInt(req.body.position)
         }
         else {
           req.body.position = 10000
         }
 
-        return sails.models.task.update(pk, req.body).then(records => {
-          if(lastParentId)
-            sails.models.task.updateParentTaskProgress(lastParentId)
+        let newParentScope = req.body.parent || ['', null]
+        // console.log('parent: ', newParentScope)
 
-          return [
-            lastData, records[0]
-          ]
-        })
+        // updating position which are larger than mine..
+        return sails.models.task
+          .find({
+            where: {
+              position: {'>=': req.body.position},
+              parent: newParentScope
+            },
+            sort: 'position ASC'
+          })
+          .then(tasks => {
+            let wasIdx = req.body.position + 1
+            return Promise.each(tasks, task => {
+              // let oldPosition = task.position
+              task.position = wasIdx++
+              task.save()
+              // sails.models.task.publishUpdate(task.id, {position: task.position}, {position: oldPosition})
+            })
+          })
+          .then(() => {
+            return sails.models.task.update(pk, req.body).then(records => {
+              if (lastParentId)
+                sails.models.task.updateParentTaskProgress(lastParentId)
+
+              return [
+                lastData, records[0]
+              ]
+            })
+          })
       })
       .spread((oldData, newData) => {
         // re-find the last data..
