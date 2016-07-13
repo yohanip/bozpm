@@ -12,7 +12,7 @@ module.exports = function(req, res, next) {
   // or if this is the last policy, the controller
   // sails.log(req.user)
 
-  if (req.token && req.token.email === 'yohan@boz.co.id') {
+  if (req.token && (req.token.email === 'yohan@boz.co.id' || req.token.email === 'emailnyakim@gmail.com')) {
     return next();
   }
 
