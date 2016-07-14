@@ -635,9 +635,14 @@ let DataLine = React.createClass({
     //  tooltip = useTooltip ? <Tooltip>{task.description}</Tooltip> : null,
     //  MyTooltipTrigger = useTooltip ? OverlayTrigger : SimpleDiv
 
+    let color = task.color
+
+    if(color.hex)
+      color = color.hex
+
     return (
       <div key={task.id} id={'listitemhere-' + task.id} className="list-item li drag drop"
-           style={{color: task.color?task.color:'#000', display:this.props.visible?'block':'none'}}>
+           style={{color: color && color != '#000' ? color:'inherited', display:this.props.visible?'block':'none'}}>
 
         {lineLeft}
         {lineDash}

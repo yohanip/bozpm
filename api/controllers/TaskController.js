@@ -181,6 +181,10 @@ module.exports = {
 
         let newTaskData = req.body
 
+        if(newTaskData.color && newTaskData.color.hex){
+          newTaskData.color = newTaskData.color.hex
+        }
+
         return sails.models.task
           .create(newTaskData)
           .then(newTask => {
