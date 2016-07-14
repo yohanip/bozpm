@@ -113,9 +113,6 @@ let MainApp = React.createClass({
     })
   },
 
-  componentDidMount: function () {
-  },
-
   render: function () {
     return (
       <Router history={hashHistory}>

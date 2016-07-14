@@ -647,7 +647,7 @@ let DataLine = React.createClass({
           <span className={cn + ' currently'}></span>
           <span className="title" style={{paddingLeft: (task.level ? task.level : 0) * 15}}
                 onDoubleClick={e => this.context.setCurrentTask(task)}>
-              {task.title} ..{task.position} {hideUnhideChildren} {thumbs}
+              {task.title} {hideUnhideChildren} {thumbs}
           </span>
           <span className="progress">{progress}</span>
           <span className="task-toolbar">
