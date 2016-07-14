@@ -44,7 +44,7 @@ module.exports = {
           if (!task) throw 'Invalid task!'
 
           // check if this task has a specific assignee
-          if (task.assignedTo && (task.assignedTo.id != req.token))
+          if (task.assignedTo && (task.assignedTo.id != req.token.id))
             throw {status: 400, error: 'Sorry, this task is assigned for: ' + task.assignedTo.nickname}
 
           // update task progress..
