@@ -92,10 +92,15 @@ module.exports = {
           .then(tasks => {
             let wasIdx = req.body.position + 1
             return Promise.each(tasks, task => {
-              // let oldPosition = task.position
+              let oldPosition = task.position
+              // console.log()
               task.position = wasIdx++
-              task.save()
-              // sails.models.task.publishUpdate(task.id, {position: task.position}, {position: oldPosition})
+              return sails.models.task
+                .update(task.id, {position: task.position})
+                .then(() => {
+                  // console.log(task.title, task.position)
+                  sails.models.task.publishUpdate(task.id, {position: task.position}, {position: oldPosition})
+                })
             })
           })
           .then(() => {

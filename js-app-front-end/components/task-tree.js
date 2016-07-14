@@ -12,6 +12,7 @@ import { Button,
   Modal,
   Col, Row,
   Form, FormGroup, FormControl,
+  OverlayTrigger, Tooltip,
   ProgressBar} from 'react-bootstrap'
 
 // one task
@@ -34,7 +35,8 @@ let TaskTree = React.createClass({
     return {
       currentData: this.state.current,
       showEditor: this.showEditor,
-      setCommented: this.setCommented
+      setCommented: this.setCommented,
+      setCurrentTask: this.setCurrentTask
     }
   },
 
@@ -75,25 +77,33 @@ let TaskTree = React.createClass({
     return idx
   },
 
+  setCurrentTask: function (task) {
+    this.setState({current: task})
+  },
+
   selectPrev: function (e) {
-    //if (e && e.preventDefault)
+    if (e && e.preventDefault) {
       e.preventDefault()
+      e.stopPropagation()
+    }
 
     let data = this.plainTree(this.state.tree, 0)
     let dataIdx = this.findData(data, this.state.current.id)
     if (dataIdx > 0) {
-      this.setState({current: data[--dataIdx]})
+      this.setCurrentTask(data[--dataIdx])
     }
   },
 
   selectNext: function (e) {
-    //if (e && e.preventDefault)
+    if (e && e.preventDefault) {
       e.preventDefault()
+      e.stopPropagation()
+    }
 
     let data = this.plainTree(this.state.tree, 0)
     let dataIdx = this.findData(data, this.state.current.id)
     if (dataIdx < data.length - 1) {
-      this.setState({current: data[++dataIdx]})
+      this.setCurrentTask(data[++dataIdx])
     }
   },
 
@@ -106,12 +116,18 @@ let TaskTree = React.createClass({
       let ele = []
 
       $.each(elements, function (i, dom) {
-        if ($(dom).hasClass('drop')) ele.push(dom)
+        let $dom = $(dom),
+          hasClass = $dom.hasClass('drop'),
+          id = $dom.attr('id')
+
+        // only those with s-main and listitem-here are drop able!
+        if ( hasClass && id && (id=='s-main' || id.indexOf('listitemhere-')) >= 0) {
+          ele.push(dom)
+        }
       })
 
-      // because element 0 will always be the helper..
       if (ele.length > 0) {
-        return ele[1]
+        return ele[0]
       }
       else {
         return null
@@ -543,6 +559,14 @@ let TaskTree = React.createClass({
   }
 })
 
+let SimpleDiv = React.createClass({
+  render: function () {
+    return (
+      <div {...this.props}>{this.props.children}</div>
+    )
+  }
+})
+
 let DataLine = React.createClass({
   getInitialState: function () {
     return {
@@ -607,6 +631,10 @@ let DataLine = React.createClass({
       }
     }
 
+    //let useTooltip = (task.description && task.description.length >= 3),
+    //  tooltip = useTooltip ? <Tooltip>{task.description}</Tooltip> : null,
+    //  MyTooltipTrigger = useTooltip ? OverlayTrigger : SimpleDiv
+
     return (
       <div key={task.id} id={'listitemhere-' + task.id} className="list-item li drag drop"
            style={{color: task.color?task.color:'#000', display:this.props.visible?'block':'none'}}>
@@ -617,8 +645,9 @@ let DataLine = React.createClass({
 
         <div className="data-line flex flex-horizontal">
           <span className={cn + ' currently'}></span>
-          <span className="title" style={{paddingLeft: (task.level ? task.level : 0) * 15}}>
-            {task.title} ..{task.position} {hideUnhideChildren} {thumbs}
+          <span className="title" style={{paddingLeft: (task.level ? task.level : 0) * 15}}
+                onDoubleClick={e => this.context.setCurrentTask(task)}>
+              {task.title} ..{task.position} {hideUnhideChildren} {thumbs}
           </span>
           <span className="progress">{progress}</span>
           <span className="task-toolbar">
@@ -660,6 +689,7 @@ TaskTree.childContextTypes = {
   currentData: React.PropTypes.object,
   showEditor: React.PropTypes.func,
   setCommented: React.PropTypes.func,
+  setCurrentTask: React.PropTypes.func
 }
 
 TaskTree.contextTypes = {
@@ -670,6 +700,7 @@ DataLine.contextTypes = {
   currentData: React.PropTypes.object,
   showEditor: React.PropTypes.func,
   setCommented: React.PropTypes.func,
+  setCurrentTask: React.PropTypes.func
 }
 
 module.exports = TaskTree
