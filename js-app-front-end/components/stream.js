@@ -80,12 +80,22 @@ let
       $(this.refs.logStream).niceScroll()
 
       // load the logs
-      StreamLogic
-        .get(io.socket, this.props.url, 1)
-        .then((logs) => {
-          // console.log(logs)
-          this.setState({logs})
-        })
+      let streamLoader = () => {
+        StreamLogic
+          .get(io.socket, this.props.url, 1)
+          .then((logs) => {
+            // console.log(logs)
+            this.setState({logs})
+          })
+      }
+
+      // initial load..
+      streamLoader()
+
+      io.socket.on('connect', () => {
+        // re-subscribe
+        streamLoader()
+      })
 
       // subscribe to created events..
       io.socket.on(this.props.watch, (payload) => {

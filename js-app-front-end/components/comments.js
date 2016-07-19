@@ -27,29 +27,40 @@ let Comments = React.createClass({
         // console.log(nextProps)
         // retrieve the comments...
         // todo: separate this to a logical file
-        io.socket.headers = {
-          Authorization: 'Bearer ' + global.user.token
+        let commentsLoader = () => {
+          io.socket.headers = {
+            Authorization: 'Bearer ' + global.user.token
+          }
+          io.socket.get(`/comment?sort=createdAt desc`, {
+            where: {
+              taskId: this.state.task.id
+            }
+          }, (comments, resp) => {
+            // console.log(comments)
+            if (resp.statusCode == 200) {
+              this.setState({comments})
+            }
+          })
         }
-        io.socket.get(`/comment?sort=createdAt desc`, {
-          where: {
-            taskId: this.state.task.id
-          }
-        }, (comments, resp) => {
-          // console.log(comments)
-          if (resp.statusCode == 200) {
-            this.setState({comments})
-          }
+
+        commentsLoader()
+
+        io.socket.on('connect', () => {
+          commentsLoader()
         })
 
         // subscribe to events..
         io.socket.on('comment', payload => {
           if (payload.verb == 'created') {
-            let comments = this.state.comments
-            comments.unshift(payload.data)
+            // only insert those comment which are meant for this task..
+            if(payload.data.taskId == this.state.task.id){
+              let comments = this.state.comments
+              comments.unshift(payload.data)
 
-            this.setState({
-              comments
-            })
+              this.setState({
+                comments
+              })
+            }
           }
         })
       })
@@ -78,6 +89,10 @@ let Comments = React.createClass({
 
     let comments = this.state.comments.map(item => {
       let progressReport = null
+
+      if(item.isProgress){
+        progressReport = <p style={{fontWeight: 'bold'}}>progress: {item.progress}%, time taken: {item.timeTaken} hour</p>
+      }
 
       return (
         <div className="media" key={item.id}>

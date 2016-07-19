@@ -121,7 +121,7 @@ let TaskTree = React.createClass({
           id = $dom.attr('id')
 
         // only those with s-main and listitem-here are drop able!
-        if ( hasClass && id && (id=='s-main' || id.indexOf('listitemhere-')) >= 0) {
+        if (hasClass && id && (id == 's-main' || id.indexOf('listitemhere-')) >= 0) {
           ele.push(dom)
         }
       })
@@ -234,15 +234,19 @@ let TaskTree = React.createClass({
           let child = data[childIdx]
           let lastParent = child.parentNode
 
+          rr.context.setLoading(true)
+
           if (!parent) {
             // we are inserting to the tree..
             // todo: move this to task logic?
             fetch('post', '/task/' + child.id, {parent: null, position: atPos})
+              .then(() => rr.context.setLoading(false))
               .catch(err => alert('Error moving task!' + err))
           }
           else {
             // todo: move this to task logic?
             fetch('post', '/task/' + child.id, {parent: parent.id, position: atPos})
+              .then(() => rr.context.setLoading(false))
               .catch(err => alert('Error moving task!' + err))
           }
         }
@@ -333,19 +337,30 @@ let TaskTree = React.createClass({
       Authorization: 'Bearer ' + global.user.token
     }
 
-    this.context.setLoading(true)
+    let getTasks = () => {
+      this.context.setLoading(true)
 
-    io.socket.get('/task', (tree, resp) => {
-      if (resp.statusCode == 200) {
-        this.plainTree(tree, 0)
-        this.setState({tree: tree, current: (tree.length > 0) ? tree[0] : null}, () => {
-          // set loading as off..
-          this.context.setLoading(false)
-        })
-      }
-      else {
-        alert('error fetching data..' + resp.statusText)
-      }
+      io.socket.get('/task', (tree, resp) => {
+        if (resp.statusCode == 200) {
+          this.plainTree(tree, 0)
+          this.setState({tree: tree, current: (tree.length > 0) ? tree[0] : null})
+        }
+        else {
+          alert('error fetching data..' + resp.statusText)
+          this.setState({tree: [], current: null})
+        }
+
+        // set loading as off..
+        this.context.setLoading(false)
+      })
+    }
+
+    // initial loading
+    getTasks()
+
+    io.socket.on('connect', () => {
+      console.log('hello!')
+      getTasks()
     })
 
     io.socket.on('task', payload => {
@@ -574,6 +589,16 @@ let DataLine = React.createClass({
     }
   },
 
+  componentDidMount: function () {
+    let dom = $(this.refs.dataline)
+    dom
+      .hover(() => {
+        dom.children('.title').css({fontWeight: 'bold'})
+      }, () => {
+        dom.children('.title').css({fontWeight: ''})
+      })
+  },
+
   render: function () {
     let task = this.props.task
     let children = null
@@ -637,18 +662,19 @@ let DataLine = React.createClass({
 
     let color = task.color
 
-    if(color.hex)
+    if (color.hex)
       color = color.hex
 
     return (
       <div key={task.id} id={'listitemhere-' + task.id} className="list-item li drag drop"
-           style={{color: color && color != '#000' ? color:'inherited', display:this.props.visible?'block':'none'}}>
+           style={{color: color && color != '#000' ? color:'inherited', display:this.props.visible?'block':'none'}}
+        >
 
         {lineLeft}
         {lineDash}
         {lineEraser}
 
-        <div className="data-line flex flex-horizontal">
+        <div className="data-line flex flex-horizontal" ref="dataline">
           <span className={cn + ' currently'}></span>
           <span className="title" style={{paddingLeft: (task.level ? task.level : 0) * 15}}
                 onDoubleClick={e => this.context.setCurrentTask(task)}>
